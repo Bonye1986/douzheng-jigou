@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, type ReactNode } from 'react'
-import { Check, MapPin, Package, Phone, Truck } from 'lucide-react'
+import Image from 'next/image'
+import { Check, MapPin, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
 import type { Order } from './orders-data'
-import type { InstitutionProfile } from './workbench-data'
+import { instIcons, type InstitutionProfile } from './workbench-data'
 
 export function ShipBookingScreen({
   orders,
@@ -35,8 +36,8 @@ export function ShipBookingScreen({
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3 [scrollbar-width:none] *:shrink-0">
         <section className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-primary to-[#5fa2f0] p-4 text-white">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/20">
-            <Truck className="size-5" aria-hidden="true" />
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white">
+            <Image src={instIcons.ship} alt="" width={36} height={36} className="size-9 object-contain mix-blend-multiply" />
           </span>
           <div className="flex min-w-0 flex-col">
             <p className="text-body font-semibold">顺丰速运 · 医学样本专线</p>
@@ -91,8 +92,8 @@ export function ShipBookingScreen({
                       >
                         {checked && <Check className="size-3" strokeWidth={3} aria-hidden="true" />}
                       </span>
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary">
-                        <Package className="size-4" aria-hidden="true" />
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#f3f7fd]">
+                        <Image src={instIcons.sample} alt="" width={28} height={28} className="size-7 object-contain mix-blend-multiply" />
                       </span>
                       <span className="flex min-w-0 flex-1 flex-col">
                         <span className="truncate text-note font-medium tabular-nums text-foreground">

@@ -1,4 +1,15 @@
-import { ChartColumn, FileCheck, Megaphone, PackageCheck, ScanLine, TicketCheck, Truck, type LucideIcon } from 'lucide-react'
+export const instIcons = {
+  verify: '/images/icons/inst-verify.png',
+  scan: '/images/icons/inst-scan.png',
+  ship: '/images/icons/inst-ship.png',
+  stats: '/images/icons/inst-stats.png',
+  arrived: '/images/icons/inst-arrived.png',
+  report: '/images/icons/mine-report.png',
+  sample: '/images/icons/mine-tosample.png',
+  notice: '/images/icons/inst-notice.png',
+  clinic: '/images/icons/inst-clinic.png',
+  pharmacy: '/images/icons/inst-pharmacy.png',
+} as const
 
 export type InstitutionProfile = {
   name: string
@@ -28,11 +39,11 @@ export const todayMetrics = [
 
 export type QuickActionKey = 'verify' | 'scan' | 'ship' | 'stats'
 
-export const quickActions: { key: QuickActionKey; label: string; icon: LucideIcon; tone: string }[] = [
-  { key: 'verify', label: '订单核销', icon: TicketCheck, tone: 'bg-secondary text-primary' },
-  { key: 'scan', label: '扫码采样', icon: ScanLine, tone: 'bg-[#e6f6f8] text-accent' },
-  { key: 'ship', label: '预约寄样', icon: Truck, tone: 'bg-warning-soft text-warning' },
-  { key: 'stats', label: '数据统计', icon: ChartColumn, tone: 'bg-success-soft text-success' },
+export const quickActions: { key: QuickActionKey; label: string; icon: string }[] = [
+  { key: 'verify', label: '订单核销', icon: instIcons.verify },
+  { key: 'scan', label: '扫码采样', icon: instIcons.scan },
+  { key: 'ship', label: '预约寄样', icon: instIcons.ship },
+  { key: 'stats', label: '数据统计', icon: instIcons.stats },
 ]
 
 export type ActivityItem = {
@@ -40,8 +51,7 @@ export type ActivityItem = {
   title: string
   desc: string
   time: string
-  icon: LucideIcon
-  tone: string
+  icon: string
   unread?: boolean
 }
 
@@ -51,8 +61,7 @@ export const activities: ActivityItem[] = [
     title: '订单核销成功',
     desc: '药物基因检测套餐 · 订单 DZ20261019088 · 受检人 李**',
     time: '10 分钟前',
-    icon: TicketCheck,
-    tone: 'bg-secondary text-primary',
+    icon: instIcons.verify,
     unread: true,
   },
   {
@@ -60,8 +69,7 @@ export const activities: ActivityItem[] = [
     title: '样本已绑定',
     desc: '样本编号 YB2610190231 已完成扫码采样，待寄送',
     time: '32 分钟前',
-    icon: ScanLine,
-    tone: 'bg-[#e6f6f8] text-accent',
+    icon: instIcons.scan,
     unread: true,
   },
   {
@@ -69,31 +77,27 @@ export const activities: ActivityItem[] = [
     title: '寄样已揽收',
     desc: '顺丰 SF1402****8817 · 共 6 份样本，预计明日送达实验室',
     time: '今天 09:12',
-    icon: Truck,
-    tone: 'bg-warning-soft text-warning',
+    icon: instIcons.ship,
   },
   {
     id: 'a4',
     title: '样本已到达实验室',
     desc: '10 月 17 日寄出的 8 份样本已签收，进入检测流程',
     time: '昨天 16:40',
-    icon: PackageCheck,
-    tone: 'bg-success-soft text-success',
+    icon: instIcons.arrived,
   },
   {
     id: 'a5',
     title: '检测报告已出具',
     desc: '受检人 张** 的心血管用药基因检测报告已生成',
     time: '昨天 11:05',
-    icon: FileCheck,
-    tone: 'bg-secondary text-primary',
+    icon: instIcons.report,
   },
   {
     id: 'a6',
     title: '平台公告',
     desc: '国庆后样本寄送时效调整说明，请合作机构留意',
     time: '10-15',
-    icon: Megaphone,
-    tone: 'bg-destructive-soft text-destructive',
+    icon: instIcons.notice,
   },
 ]

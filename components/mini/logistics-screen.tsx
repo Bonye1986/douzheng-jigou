@@ -1,10 +1,11 @@
 'use client'
 
-import { Building2, Copy, MapPin, Phone, Truck } from 'lucide-react'
+import Image from 'next/image'
+import { Building2, Copy, MapPin, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
 import { getEventTime, trackingNo, type Order } from './orders-data'
-import type { InstitutionProfile } from './workbench-data'
+import { instIcons, type InstitutionProfile } from './workbench-data'
 
 const LAB_NAME = '都正生物医学检验实验室'
 const LAB_ADDRESS = '湖南省长沙市岳麓区麓谷大道 627 号 · 样本接收中心'
@@ -64,8 +65,8 @@ export function LogisticsScreen({
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3 [scrollbar-width:none] *:shrink-0">
         <section className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-primary to-[#5fa2f0] p-4 text-white">
           <div className="flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/20">
-              <Truck className="size-5" aria-hidden="true" />
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white">
+              <Image src={instIcons.ship} alt="" width={36} height={36} className="size-9 object-contain mix-blend-multiply" />
             </span>
             <div className="flex min-w-0 flex-1 flex-col">
               <p className="text-title font-semibold">{latest.status}</p>

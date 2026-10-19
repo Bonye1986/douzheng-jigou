@@ -1,7 +1,8 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Check, ChartColumn, type LucideIcon } from 'lucide-react'
+import Image from 'next/image'
+import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ActionSheet, SheetRow } from './action-sheet'
 import { InstitutionTabBar, type InstitutionTabKey } from './institution-tab-bar'
@@ -207,7 +208,7 @@ export function InstitutionApp({
           manualPlaceholder="如 YW2610190019"
           demoCode={`YW${(target ?? candidates[0])?.no.slice(-10) ?? '2610190019'}`}
           validate={(code) => {
-            if (!SAMPLE_CODE_PATTERN.test(code)) return '样本编码格式有误，应为 YW + 10 位数字'
+            if (!SAMPLE_CODE_PATTERN.test(code)) return '样本编码格式有��，应为 YW + 10 位数字'
             if (orderList.some((o) => o.sampleCode === code)) return '该样本编码已绑定其他订单'
             if (!target && candidates.length === 0) return '暂无待采样的订单'
           }}
@@ -362,15 +363,13 @@ function OrderBrief({ order }: { order: Order }) {
   )
 }
 
-function TabPlaceholder({ title, icon: Icon }: { title: string; icon: LucideIcon }) {
+function TabPlaceholder({ title, icon }: { title: string; icon: string }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <StatusBar />
       <NavBar title={title} />
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
-        <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-primary">
-          <Icon className="size-7" aria-hidden="true" />
-        </span>
+        <Image src={icon} alt="" width={72} height={72} className="size-18 object-contain mix-blend-multiply" />
         <p className="text-title font-medium text-foreground">{title}</p>
         <p className="text-note text-muted-foreground">该页面将在后续版本中设计</p>
       </div>

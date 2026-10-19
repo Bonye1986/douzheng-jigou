@@ -1,10 +1,12 @@
 'use client'
 
-import { ChevronRight, Clock, MapPin, Phone, Pill, Stethoscope } from 'lucide-react'
+import Image from 'next/image'
+import { ChevronRight, Clock, MapPin, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { StatusBar, Capsule } from './phone-frame'
 import {
   activities,
+  instIcons,
   institution,
   quickActions,
   todayMetrics,
@@ -42,16 +44,20 @@ export function WorkbenchScreen({
             常用功能
           </h2>
           <ul className="mt-4 grid grid-cols-4 gap-2">
-            {quickActions.map(({ key, label, icon: Icon, tone }) => (
+            {quickActions.map(({ key, label, icon }) => (
               <li key={key}>
                 <button
                   type="button"
                   onClick={() => onAction?.(key, label)}
                   className="flex w-full flex-col items-center gap-2 rounded-xl py-1 transition-transform active:scale-95"
                 >
-                  <span className={cn('flex size-12 items-center justify-center rounded-2xl', tone)}>
-                    <Icon className="size-6" aria-hidden="true" />
-                  </span>
+                  <Image
+                    src={icon}
+                    alt=""
+                    width={48}
+                    height={48}
+                    className="size-12 object-contain mix-blend-multiply"
+                  />
                   <span className="text-note font-medium text-foreground">{label}</span>
                 </button>
               </li>
@@ -76,15 +82,21 @@ export function WorkbenchScreen({
             </button>
           </div>
           <ul className="mt-2 divide-y divide-border">
-            {activities.map(({ id, title, desc, time, icon: Icon, tone, unread }) => (
+            {activities.map(({ id, title, desc, time, icon, unread }) => (
               <li key={id}>
                 <button
                   type="button"
                   onClick={() => onAction?.('activity', title)}
                   className="flex w-full gap-3 py-3 text-left"
                 >
-                  <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', tone)}>
-                    <Icon className="size-[18px]" aria-hidden="true" />
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f3f7fd]">
+                    <Image
+                      src={icon}
+                      alt=""
+                      width={32}
+                      height={32}
+                      className="size-8 object-contain mix-blend-multiply"
+                    />
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span className="flex items-center justify-between gap-2">
@@ -129,7 +141,7 @@ function InfoRow({
 }
 
 function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onOpen: () => void }) {
-  const TypeIcon = profile.type === '药店' ? Pill : Stethoscope
+  const typeIcon = profile.type === '药店' ? instIcons.pharmacy : instIcons.clinic
   return (
     <section aria-labelledby="wb-inst" className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_#3a82e41a]">
       <button
@@ -139,8 +151,14 @@ function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onO
         className="flex w-full flex-col gap-3 p-4 text-left transition-colors active:bg-secondary/40"
       >
         <span className="flex w-full items-center gap-3">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-[#5fa2f0] text-white shadow-[0_4px_12px_#3a82e440]">
-            <TypeIcon className="size-6" aria-hidden="true" />
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[#f3f7fd]">
+            <Image
+              src={typeIcon}
+              alt=""
+              width={44}
+              height={44}
+              className="size-11 object-contain mix-blend-multiply"
+            />
           </span>
           <span className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="flex min-w-0 items-center gap-1.5">

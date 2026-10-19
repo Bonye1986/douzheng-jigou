@@ -1,11 +1,11 @@
-import { ChartColumn, ClipboardList, LayoutGrid, type LucideIcon } from 'lucide-react'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 export const institutionTabs = [
-  { key: 'workbench', label: '工作台', icon: LayoutGrid },
-  { key: 'orders', label: '订单管理', icon: ClipboardList },
-  { key: 'stats', label: '数据统计', icon: ChartColumn },
-] as const satisfies readonly { key: string; label: string; icon: LucideIcon }[]
+  { key: 'workbench', label: '工作台', icon: '/images/icons/inst-workbench.png' },
+  { key: 'orders', label: '订单管理', icon: '/images/icons/sec-orders.png' },
+  { key: 'stats', label: '数据统计', icon: '/images/icons/inst-stats.png' },
+] as const
 
 export type InstitutionTabKey = (typeof institutionTabs)[number]['key']
 
@@ -19,7 +19,7 @@ export function InstitutionTabBar({
   return (
     <nav aria-label="底部导航" className="shrink-0 border-t border-border bg-white pb-5">
       <ul className="flex h-[54px] items-center">
-        {institutionTabs.map(({ key, label, icon: Icon }) => {
+        {institutionTabs.map(({ key, label, icon }) => {
           const isActive = key === active
           return (
             <li key={key} className="flex-1">
@@ -32,7 +32,16 @@ export function InstitutionTabBar({
                   isActive ? 'font-medium text-primary' : 'text-muted-foreground',
                 )}
               >
-                <Icon className="size-6" strokeWidth={isActive ? 2.2 : 1.8} aria-hidden="true" />
+                <Image
+                  src={icon}
+                  alt=""
+                  width={24}
+                  height={24}
+                  className={cn(
+                    'size-6 object-contain mix-blend-multiply transition',
+                    !isActive && 'opacity-45 grayscale',
+                  )}
+                />
                 {label}
               </button>
             </li>
