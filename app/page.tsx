@@ -1,6 +1,7 @@
 import { DesignBoard, type BoardSection } from '@/components/design/design-board'
 import { BrandMark } from '@/components/mini/brand'
 import { InstitutionApp } from '@/components/mini/institution-app'
+import { InstitutionSettingsScreen } from '@/components/mini/institution-settings'
 import { DEMO_ACCOUNT, DEMO_PASSWORD, LoginScreen } from '@/components/mini/login-screen'
 
 const sections: BoardSection[] = [
@@ -72,12 +73,11 @@ const sections: BoardSection[] = [
         title: '机构工作台',
         desc: '机构登录后的首页，集中展示机构信息、今日业务数据、常用功能入口与最新业务动态。底部菜单分为「工作台」「数据统计」两项',
         features: [
-          '机构信息：机构名称、认证状态、科室、机构编号、联系人与地址，点击可查看机构详情',
+          '机构信息：机构名称、机构类型（诊所 / 药店）、机构编号、工作时间、联系电话与地址，点击进入机构设置',
           '今日数据：今日核销单数、今日采样例数、待寄样份数，每日 0 点重置',
           '常用功能：订单核销、扫码采样、预约寄样、数据统计 4 个快捷入口',
           '最新动态：按时间倒序展示核销、采样、寄样、样本到达、报告出具与平台公告，未读动态带红点',
-          '右上角消息铃铛，有未读消息时显示红点',
-          '底部菜单：工作台 / 数据统计，当前页高亮',
+          '底部菜单：工作台 / 订单管理 / 数据统计，当前页高亮',
         ],
         interactions: [
           '点击常用功能「订单核销」「扫码采样」「预约寄样」进入对应功能页（演示中以 Toast 提示）',
@@ -87,6 +87,47 @@ const sections: BoardSection[] = [
           '页面内容超出一屏时上下滚动，顶部导航与底部菜单固定',
         ],
         node: <InstitutionApp />,
+      },
+    ],
+  },
+  {
+    key: 'settings',
+    title: '机构设置',
+    screens: [
+      {
+        id: '05',
+        title: '机构设置',
+        desc: '在工作台点击机构信息卡片进入，可维护对外展示的机构资料，并入口修改登录密码',
+        features: [
+          '顶部展示机构类型与机构编号（只读，由平台分配）',
+          '机构名称：最多 30 字',
+          '工作时间：分别选择开始与结束时间，工作台展示为「每日 08:00 - 20:00」',
+          '联系电话：支持手机号或座机号',
+          '机构地址：最多 60 字，两行展示',
+          '登录密码：点击进入修改密码页',
+        ],
+        interactions: [
+          '任一字段有修改时「保存」按钮才可点击',
+          '保存时校验必填项、时间先后与电话格式，不通过时在表单下方提示原因',
+          '保存成功 Toast 提示，返回工作台后机构信息同步更新',
+        ],
+        node: <InstitutionSettingsScreen />,
+      },
+      {
+        id: '06',
+        title: '修改登录密码',
+        desc: '验证原密码后设置新密码，修改成功后需重新登录',
+        features: [
+          '原密码、新密码、确认新密码三项，均支持明文 / 密文切换',
+          '新密码规则：8-20 位，须同时包含字母和数字',
+          '底部说明密码规则、重新登录与「记住密码」失效提示',
+        ],
+        interactions: [
+          '三项均填写后「确认修改」按钮才可点击',
+          `依次校验原密码是否正确（演示原密码 ${DEMO_PASSWORD}）、新密码格式、是否与原密码相同、两次输入是否一致`,
+          '修改成功 Toast 提示，退出登录并返回登录页',
+        ],
+        node: <InstitutionSettingsScreen initialView="password" />,
       },
     ],
   },

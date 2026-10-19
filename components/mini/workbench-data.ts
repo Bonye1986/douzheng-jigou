@@ -1,10 +1,22 @@
 import { ChartColumn, FileCheck, Megaphone, PackageCheck, ScanLine, TicketCheck, Truck, type LucideIcon } from 'lucide-react'
 
-export const institution = {
-  name: '长沙市中心医院',
-  department: '精准用药检测中心',
+export type InstitutionProfile = {
+  name: string
+  type: '诊所' | '药店'
+  code: string
+  openTime: string
+  closeTime: string
+  phone: string
+  address: string
+}
+
+export const institution: InstitutionProfile = {
+  name: '仁和堂中西医结合诊所',
+  type: '诊所',
   code: 'JG-430102-0018',
-  contact: '王医生 · 138****6621',
+  openTime: '08:00',
+  closeTime: '20:00',
+  phone: '0731-8862 6621',
   address: '长沙市天心区解放西路 168 号',
 }
 

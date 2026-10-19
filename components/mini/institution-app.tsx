@@ -4,10 +4,14 @@ import { useRef, useState } from 'react'
 import { ChartColumn, ClipboardList, type LucideIcon } from 'lucide-react'
 import { InstitutionTabBar, type InstitutionTabKey } from './institution-tab-bar'
 import { NavBar, StatusBar } from './phone-frame'
+import { InstitutionSettingsScreen } from './institution-settings'
+import { institution, type InstitutionProfile } from './workbench-data'
 import { WorkbenchScreen } from './workbench-screen'
 
 export function InstitutionApp({ initialTab = 'workbench' }: { initialTab?: InstitutionTabKey }) {
   const [tab, setTab] = useState<InstitutionTabKey>(initialTab)
+  const [profile, setProfile] = useState<InstitutionProfile>(institution)
+  const [showSettings, setShowSettings] = useState(false)
   const [toast, setToast] = useState('')
   const toastTimer = useRef<number | undefined>(undefined)
 
@@ -17,13 +21,30 @@ export function InstitutionApp({ initialTab = 'workbench' }: { initialTab?: Inst
     toastTimer.current = window.setTimeout(() => setToast(''), 1600)
   }
 
+  if (showSettings) {
+    return (
+      <div className="relative flex h-full flex-col bg-background">
+        <InstitutionSettingsScreen
+          profile={profile}
+          onBack={() => setShowSettings(false)}
+          onSave={setProfile}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="relative flex h-full flex-col bg-background">
       {tab === 'workbench' ? (
         <WorkbenchScreen
+          profile={profile}
           onAction={(key, label) => {
             if (key === 'stats') {
               setTab('stats')
+              return
+            }
+            if (key === 'profile') {
+              setShowSettings(true)
               return
             }
             showToast(`即将进入「${label}」`)

@@ -1,13 +1,22 @@
 'use client'
 
-import { BadgeCheck, Building2, ChevronRight, MapPin, Phone } from 'lucide-react'
+import { ChevronRight, Clock, MapPin, Phone, Pill, Stethoscope } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { StatusBar, Capsule } from './phone-frame'
-import { activities, institution, quickActions, todayMetrics, type QuickActionKey } from './workbench-data'
+import {
+  activities,
+  institution,
+  quickActions,
+  todayMetrics,
+  type InstitutionProfile,
+  type QuickActionKey,
+} from './workbench-data'
 
 export function WorkbenchScreen({
+  profile = institution,
   onAction,
 }: {
+  profile?: InstitutionProfile
   onAction?: (key: QuickActionKey | 'activity' | 'profile', label: string) => void
 }) {
   return (
@@ -25,7 +34,7 @@ export function WorkbenchScreen({
       </div>
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-5 pt-2 [scrollbar-width:none] *:shrink-0">
-        <InstitutionCard onOpen={() => onAction?.('profile', '机构信息')} />
+        <InstitutionCard profile={profile} onOpen={() => onAction?.('profile', '机构信息')} />
 
         <section aria-labelledby="wb-quick" className="rounded-2xl bg-white p-4 shadow-sm">
           <h2 id="wb-quick" className="flex items-center gap-1.5 text-title font-semibold text-foreground">
@@ -101,33 +110,43 @@ export function WorkbenchScreen({
   )
 }
 
-function InstitutionCard({ onOpen }: { onOpen: () => void }) {
+function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onOpen: () => void }) {
+  const TypeIcon = profile.type === '药店' ? Pill : Stethoscope
   return (
     <section aria-labelledby="wb-inst" className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_#3a82e41a]">
-      <button type="button" onClick={onOpen} className="flex w-full items-start gap-3 p-4 text-left">
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`${profile.name}，进入机构设置`}
+        className="flex w-full items-start gap-3 p-4 text-left"
+      >
         <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-[#5fa2f0] text-white">
-          <Building2 className="size-6" aria-hidden="true" />
+          <TypeIcon className="size-6" aria-hidden="true" />
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="flex items-center gap-1.5">
             <span id="wb-inst" className="truncate text-title font-bold text-foreground">
-              {institution.name}
+              {profile.name}
             </span>
-            <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-success-soft px-1.5 py-0.5 text-tag font-medium text-success">
-              <BadgeCheck className="size-3" aria-hidden="true" />
-              已认证
+            <span className="shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-tag font-medium text-primary">
+              {profile.type}
             </span>
           </span>
-          <span className="mt-0.5 text-caption text-muted-foreground">
-            {institution.department} · {institution.code}
-          </span>
+          <span className="mt-0.5 text-caption text-muted-foreground">机构编号 {profile.code}</span>
           <span className="mt-2 flex items-center gap-1 text-caption text-muted-foreground">
+            <Clock className="size-3.5 shrink-0 text-faint" aria-hidden="true" />
+            <span className="sr-only">工作时间</span>
+            <span className="tabular-nums">
+              每日 {profile.openTime} - {profile.closeTime}
+            </span>
+          </span>
+          <span className="mt-1 flex items-center gap-1 text-caption text-muted-foreground">
             <Phone className="size-3.5 shrink-0 text-faint" aria-hidden="true" />
-            {institution.contact}
+            <span className="tabular-nums">{profile.phone}</span>
           </span>
           <span className="mt-1 flex items-center gap-1 text-caption text-muted-foreground">
             <MapPin className="size-3.5 shrink-0 text-faint" aria-hidden="true" />
-            <span className="truncate">{institution.address}</span>
+            <span className="truncate">{profile.address}</span>
           </span>
         </span>
         <ChevronRight className="mt-3.5 size-4 shrink-0 text-faint" aria-hidden="true" />
