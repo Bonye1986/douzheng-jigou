@@ -67,7 +67,7 @@ export function ReportScreen({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3 [scrollbar-width:none] *:shrink-0">
-        <section className="rounded-2xl bg-gradient-to-br from-primary to-[#5fa2f0] p-4 text-white">
+        <section className="rounded-2xl bg-brand p-4 text-white">
           <p className="text-caption text-white/80">{order.product}</p>
           <h2 className="mt-1 text-headline font-bold">药物基因检测报告</h2>
           <p className="mt-1 text-caption tabular-nums text-white/85">出具时间 {issuedAt}</p>
@@ -164,7 +164,7 @@ export function ReportScreen({
         <button
           type="button"
           onClick={onDownload}
-          className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-primary to-[#5fa2f0] text-body font-medium text-white shadow-[0_4px_12px_#3a82e440] transition-transform active:scale-95"
+          className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-brand text-body font-medium text-white shadow-brand transition-transform active:scale-95"
         >
           <Download className="size-4" aria-hidden="true" />
           下载 PDF 报告

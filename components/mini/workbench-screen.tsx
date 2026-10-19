@@ -25,7 +25,7 @@ export function WorkbenchScreen({
     <div className="relative flex min-h-0 flex-1 flex-col bg-background">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[300px] bg-[linear-gradient(180deg,#d6e8ff_0%,#e9f2fe_55%,#f5f8fc00_100%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[320px] bg-[radial-gradient(90%_70%_at_100%_0%,#c4dcff_0%,#c4dcff00_70%),radial-gradient(70%_60%_at_0%_10%,#dff4f7_0%,#dff4f700_70%),linear-gradient(180deg,#e2eeff_0%,#eef5fe_60%,#f5f8fc_100%)]"
       />
       <div className="relative z-10 shrink-0">
         <StatusBar />
@@ -39,26 +39,19 @@ export function WorkbenchScreen({
         <InstitutionCard profile={profile} onOpen={() => onAction?.('profile', '机构信息')} />
 
         <section aria-labelledby="wb-quick" className="rounded-2xl bg-white p-4 shadow-sm">
-          <h2 id="wb-quick" className="flex items-center gap-1.5 text-title font-semibold text-foreground">
-            <span aria-hidden="true" className="h-3.5 w-1 rounded-full bg-gradient-to-b from-primary to-primary/40" />
-            常用功能
-          </h2>
-          <ul className="mt-4 grid grid-cols-4 gap-2">
+          <SectionTitle id="wb-quick" title="常用功能" />
+          <ul className="mt-3.5 grid grid-cols-4 gap-2">
             {quickActions.map(({ key, label, icon }) => (
               <li key={key}>
                 <button
                   type="button"
                   onClick={() => onAction?.(key, label)}
-                  className="flex w-full flex-col items-center gap-2 rounded-xl py-1 transition-transform active:scale-95"
+                  className="group flex w-full flex-col items-center gap-2 rounded-xl py-1 transition-transform active:scale-95"
                 >
-                  <Image
-                    src={icon}
-                    alt=""
-                    width={48}
-                    height={48}
-                    className="size-12 object-contain mix-blend-multiply"
-                  />
-                  <span className="text-note font-medium text-foreground">{label}</span>
+                  <span className="flex size-[52px] items-center justify-center rounded-[18px] bg-[linear-gradient(160deg,#f6f9ff_0%,#e8f0fc_100%)] ring-1 ring-inset ring-white">
+                    <Image src={icon} alt="" width={80} height={80} className="size-10 object-contain drop-shadow-[0_3px_4px_rgb(58_130_228/0.18)]" />
+                  </span>
+                  <span className="text-caption font-medium text-foreground">{label}</span>
                 </button>
               </li>
             ))}
@@ -67,10 +60,7 @@ export function WorkbenchScreen({
 
         <section aria-labelledby="wb-feed" className="rounded-2xl bg-white px-4 pb-1 pt-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <h2 id="wb-feed" className="flex items-center gap-1.5 text-title font-semibold text-foreground">
-              <span aria-hidden="true" className="h-3.5 w-1 rounded-full bg-gradient-to-b from-primary to-primary/40" />
-              最新动态
-            </h2>
+            <SectionTitle id="wb-feed" title="最新动态" />
             <button
               type="button"
               onClick={() => onAction?.('activity', '全部动态')}
@@ -89,14 +79,8 @@ export function WorkbenchScreen({
                   onClick={() => onAction?.('activity', title)}
                   className="flex w-full gap-3 py-3 text-left"
                 >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f3f7fd]">
-                    <Image
-                      src={icon}
-                      alt=""
-                      width={32}
-                      height={32}
-                      className="size-8 object-contain mix-blend-multiply"
-                    />
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(160deg,#f6f9ff_0%,#ebf2fc_100%)] ring-1 ring-inset ring-white">
+                    <Image src={icon} alt="" width={64} height={64} className="size-7 object-contain" />
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span className="flex items-center justify-between gap-2">
@@ -122,6 +106,14 @@ export function WorkbenchScreen({
   )
 }
 
+function SectionTitle({ id, title }: { id: string; title: string }) {
+  return (
+    <h2 id={id} className="text-title font-semibold tracking-tight text-foreground">
+      {title}
+    </h2>
+  )
+}
+
 function InfoRow({
   icon: Icon,
   label,
@@ -142,7 +134,7 @@ function InfoRow({
 
 function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onOpen: () => void }) {
   return (
-    <section aria-labelledby="wb-inst" className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_#3a82e41a]">
+    <section aria-labelledby="wb-inst" className="overflow-hidden rounded-2xl bg-white shadow-md">
       <button
         type="button"
         onClick={onOpen}
@@ -197,14 +189,14 @@ function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onO
           </InfoRow>
         </span>
       </button>
-      <dl className="grid grid-cols-3 border-t border-border bg-[linear-gradient(180deg,#f7faff,#fff)] py-3">
+      <dl className="mx-4 grid grid-cols-3 border-t border-dashed border-border py-3.5">
         {todayMetrics.map((metric, index) => (
           <div
             key={metric.label}
             className={cn('flex flex-col-reverse items-center gap-0.5', index > 0 && 'border-l border-border')}
           >
             <dt className="text-caption text-muted-foreground">{metric.label}</dt>
-            <dd className="text-headline font-bold tabular-nums text-foreground">
+            <dd className="text-headline font-bold tabular-nums tracking-tight text-foreground">
               {metric.value}
               <span className="ml-0.5 text-caption font-normal text-muted-foreground">{metric.unit}</span>
             </dd>

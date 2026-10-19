@@ -45,7 +45,7 @@ export function OrderDetailScreen({
       <div
         className={cn(
           'shrink-0 text-white',
-          closed ? 'bg-gradient-to-b from-[#8e9aab] to-[#a9b3c1]' : 'bg-gradient-to-b from-primary to-[#5fa2f0]',
+          closed ? 'bg-[#97a3b4]' : 'bg-[#3d84e6]',
         )}
       >
         <StatusBar tone="light" />
@@ -56,12 +56,22 @@ export function OrderDetailScreen({
         <section
           aria-label="订单状态"
           className={cn(
-            'px-5 pb-12 pt-2 text-white',
-            closed ? 'bg-gradient-to-b from-[#a9b3c1] to-[#b8c1cd]' : 'bg-gradient-to-b from-[#5fa2f0] to-[#7cb4f3]',
+            'relative overflow-hidden px-5 pb-12 pt-2 text-white',
+            closed
+              ? 'bg-[linear-gradient(180deg,#97a3b4_0%,#b3bdca_100%)]'
+              : 'bg-[linear-gradient(180deg,#3d84e6_0%,#6aa8f3_100%)]',
           )}
         >
-          <h2 className="text-headline font-bold">{status.label}</h2>
-          <p className="mt-1 text-note text-white/85">
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-20 size-48 rounded-full border-[28px] border-white/10"
+          />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute right-16 top-10 size-16 rounded-full bg-white/10 blur-xl"
+          />
+          <h2 className="relative text-headline font-bold tracking-tight">{status.label}</h2>
+          <p className="relative mt-1 text-note text-white/85">
             {closed ? `关闭时间 ${getCloseTime(order)}` : status.hint}
           </p>
         </section>
@@ -76,7 +86,7 @@ export function OrderDetailScreen({
                 alt=""
                 width={112}
                 height={112}
-                className={cn('size-14 shrink-0 rounded-xl bg-secondary object-cover', closed && 'opacity-50 grayscale')}
+                className={cn('size-16 shrink-0 rounded-xl bg-secondary object-cover ring-1 ring-border/70', closed && 'opacity-50 grayscale')}
               />
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <p className="truncate text-body font-medium text-foreground">{order.product}</p>
@@ -188,13 +198,13 @@ export function OrderDetailScreen({
       </div>
 
       {actions.length > 0 && (
-        <footer className="flex shrink-0 items-center justify-end gap-2.5 border-t border-border bg-white px-4 pb-7 pt-2.5">
+        <footer className="flex shrink-0 items-center justify-end gap-2.5 bg-white px-4 pb-7 pt-2.5 shadow-[0_-1px_0_#e6edf6,0_-6px_16px_-8px_rgb(36_64_110/0.08)]">
           {actions.map((action) => {
             const className = cn(
               'flex h-10 items-center justify-center rounded-full px-5 text-body font-medium transition-transform active:scale-95',
               action.primary
-                ? 'min-w-28 bg-gradient-to-r from-primary to-[#5fa2f0] text-white shadow-[0_4px_12px_#3a82e440]'
-                : 'border border-border text-foreground',
+                ? 'min-w-28 bg-brand text-white shadow-brand'
+                : 'border border-[#dfe6f0] bg-white text-foreground',
             )
             return action.tel ? (
               <a

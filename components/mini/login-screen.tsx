@@ -7,8 +7,7 @@ import { cn } from '@/lib/utils'
 import { BrandLogo } from './brand'
 import { NavBar, StatusBar } from './phone-frame'
 
-export const DEMO_ACCOUNT = 'jg_changsha01'
-export const DEMO_PASSWORD = 'Dz123456'
+import { DEMO_ACCOUNT, DEMO_PASSWORD } from './demo-credentials'
 
 type Status = 'idle' | 'loading' | 'success'
 

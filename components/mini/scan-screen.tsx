@@ -215,7 +215,7 @@ export function ScanScreen({
               />
               <button
                 type="submit"
-                className="h-10 shrink-0 rounded-xl bg-gradient-to-r from-primary to-[#5fa2f0] px-4 text-body font-medium text-white"
+                className="h-10 shrink-0 rounded-xl bg-brand px-4 text-body font-medium text-white"
               >
                 确认
               </button>

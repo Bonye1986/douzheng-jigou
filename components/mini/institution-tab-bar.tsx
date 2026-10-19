@@ -17,7 +17,10 @@ export function InstitutionTabBar({
   onSelect?: (key: InstitutionTabKey) => void
 }) {
   return (
-    <nav aria-label="底部导航" className="shrink-0 border-t border-border bg-white pb-5">
+    <nav
+      aria-label="底部导航"
+      className="shrink-0 bg-white/95 pb-5 shadow-[0_-1px_0_#e9eef5,0_-8px_20px_-12px_rgb(36_64_110/0.12)] backdrop-blur"
+    >
       <ul className="flex h-[54px] items-center">
         {institutionTabs.map(({ key, label, icon }) => {
           const isActive = key === active
@@ -28,18 +31,18 @@ export function InstitutionTabBar({
                 onClick={() => onSelect?.(key)}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'flex w-full flex-col items-center gap-0.5 text-tag transition-colors',
-                  isActive ? 'font-medium text-primary' : 'text-muted-foreground',
+                  'flex w-full flex-col items-center gap-1 text-tag transition-colors',
+                  isActive ? 'font-semibold text-primary' : 'text-muted-foreground',
                 )}
               >
                 <Image
                   src={icon}
                   alt=""
-                  width={24}
-                  height={24}
+                  width={52}
+                  height={52}
                   className={cn(
-                    'size-6 object-contain mix-blend-multiply transition',
-                    !isActive && 'opacity-45 grayscale',
+                    'size-[26px] object-contain transition',
+                    isActive ? 'scale-105 drop-shadow-[0_2px_3px_rgb(58_130_228/0.25)]' : 'opacity-40 grayscale',
                   )}
                 />
                 {label}

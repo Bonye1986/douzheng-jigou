@@ -63,8 +63,8 @@
   --text-display--line-height: 36px;
   --text-hero: 36px;
   --text-hero--line-height: 44px;
-  --shadow-sm: 0 2px 12px rgb(36 64 110 / 0.05), 0 1px 2px rgb(36 64 110 / 0.04);
-  --shadow-md: 0 6px 20px rgb(36 64 110 / 0.08);
+  --shadow-sm: 0 0 0 1px rgb(36 64 110 / 0.035), 0 1px 2px rgb(36 64 110 / 0.04), 0 6px 18px -6px rgb(36 64 110 / 0.08);
+  --shadow-md: 0 0 0 1px rgb(58 130 228 / 0.05), 0 2px 4px rgb(36 64 110 / 0.03), 0 12px 32px -8px rgb(58 130 228 / 0.18);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -72,6 +72,14 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@utility bg-brand {
+  background-image: linear-gradient(135deg, #5d9df4 0%, #3a82e4 55%, #2f72d8 100%);
+}
+
+@utility shadow-brand {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), 0 6px 14px -4px rgb(58 130 228 / 0.5);
 }
 
 :root {

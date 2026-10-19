@@ -3,7 +3,8 @@ import { orderDetailScreens, orderFlowScreens, orderListScreens } from '@/compon
 import { BrandMark } from '@/components/mini/brand'
 import { InstitutionApp } from '@/components/mini/institution-app'
 import { InstitutionSettingsScreen } from '@/components/mini/institution-settings'
-import { DEMO_ACCOUNT, DEMO_PASSWORD, LoginScreen } from '@/components/mini/login-screen'
+import { DEMO_ACCOUNT, DEMO_PASSWORD } from '@/components/mini/demo-credentials'
+import { LoginScreen } from '@/components/mini/login-screen'
 
 const sections: BoardSection[] = [
   {

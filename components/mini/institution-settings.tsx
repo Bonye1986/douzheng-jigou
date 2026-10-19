@@ -3,7 +3,7 @@
 import { useId, useRef, useState, type ReactNode } from 'react'
 import { ChevronRight, CircleAlert, Eye, EyeOff, LockKeyhole } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { DEMO_PASSWORD } from './login-screen'
+import { DEMO_PASSWORD } from './demo-credentials'
 import { NavBar, StatusBar } from './phone-frame'
 import { institution as defaultProfile, type InstitutionProfile } from './workbench-data'
 

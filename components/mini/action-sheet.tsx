@@ -49,7 +49,7 @@ export function ActionSheet({
               'h-11 w-full rounded-full text-body font-medium text-white transition-transform active:scale-[0.98]',
               confirmDisabled
                 ? 'bg-[#c3d4ea]'
-                : 'bg-gradient-to-r from-primary to-[#5fa2f0] shadow-[0_4px_12px_#3a82e440]',
+                : 'bg-brand shadow-brand',
             )}
           >
             {confirmLabel}

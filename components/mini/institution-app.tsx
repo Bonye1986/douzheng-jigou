@@ -369,7 +369,7 @@ function TabPlaceholder({ title, icon }: { title: string; icon: string }) {
       <StatusBar />
       <NavBar title={title} />
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
-        <Image src={icon} alt="" width={72} height={72} className="size-18 object-contain mix-blend-multiply" />
+        <Image src={icon} alt="" width={72} height={72} className="size-18 object-contain" />
         <p className="text-title font-medium text-foreground">{title}</p>
         <p className="text-note text-muted-foreground">该页面将在后续版本中设计</p>
       </div>

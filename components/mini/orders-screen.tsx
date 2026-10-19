@@ -17,10 +17,10 @@ import {
 type FilterKey = 'all' | OrderStatus
 
 const toneClass: Record<StatusTone, string> = {
-  warning: 'text-warning',
-  primary: 'text-primary',
-  success: 'text-success',
-  muted: 'text-faint',
+  warning: 'bg-warning-soft text-warning',
+  primary: 'bg-secondary text-primary',
+  success: 'bg-success-soft text-success',
+  muted: 'bg-muted text-faint',
 }
 
 const statusMap = Object.fromEntries(orderStatuses.map((s) => [s.key, s])) as Record<
@@ -63,7 +63,7 @@ export function OrdersScreen({
         <StatusBar />
         <NavBar title="订单管理" />
         <div className="px-4 pb-2 pt-1">
-          <label className="flex h-9 items-center gap-2 rounded-full bg-[#f2f5fa] px-3.5">
+          <label className="flex h-9 items-center gap-2 rounded-full bg-[#f4f7fb] px-3.5 ring-1 ring-inset ring-[#e9eef6] transition focus-within:bg-white focus-within:ring-primary/40">
             <Search className="size-4 shrink-0 text-faint" aria-hidden="true" />
             <span className="sr-only">搜索订单</span>
             <input
@@ -122,7 +122,7 @@ export function OrdersScreen({
                 {active && (
                   <span
                     aria-hidden="true"
-                    className="absolute inset-x-0 bottom-0 mx-auto h-[3px] w-5 rounded-full bg-primary"
+                    className="absolute inset-x-0 bottom-0 mx-auto h-[3px] w-4 rounded-full bg-brand"
                   />
                 )}
               </button>
@@ -165,7 +165,7 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
 
   return (
     <article className="rounded-2xl bg-white shadow-sm">
-      <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5">
+      <header className="mx-4 flex items-center justify-between gap-2 border-b border-dashed border-border py-2.5">
         <span className="flex min-w-0 items-center gap-1 text-caption text-muted-foreground">
           订单号
           <span className="truncate tabular-nums text-foreground">{order.no}</span>
@@ -178,7 +178,9 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
             <Copy className="size-3" aria-hidden="true" />
           </button>
         </span>
-        <span className={cn('shrink-0 text-note font-semibold', toneClass[status.tone])}>{status.label}</span>
+        <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-caption font-medium', toneClass[status.tone])}>
+          {status.label}
+        </span>
       </header>
 
       <button
@@ -192,7 +194,7 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
           alt=""
           width={112}
           height={112}
-          className={cn('size-14 shrink-0 rounded-xl bg-secondary object-cover', closed && 'opacity-50 grayscale')}
+          className={cn('size-16 shrink-0 rounded-xl bg-secondary object-cover ring-1 ring-border/70', closed && 'opacity-50 grayscale')}
         />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className={cn('truncate text-body font-medium', closed ? 'text-muted-foreground' : 'text-foreground')}>
@@ -223,10 +225,10 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
           <span className="flex shrink-0 gap-2">
             {actions.map((action) => {
               const className = cn(
-                'flex h-7 items-center rounded-full px-3.5 text-caption font-medium transition-transform active:scale-95',
+                'flex h-[30px] items-center rounded-full px-4 text-caption font-medium transition-transform active:scale-95',
                 action.primary
-                  ? 'bg-gradient-to-r from-primary to-[#5fa2f0] text-white shadow-[0_2px_8px_#3a82e440]'
-                  : 'border border-border text-foreground',
+                  ? 'bg-brand text-white shadow-brand'
+                  : 'border border-[#dfe6f0] bg-white text-foreground',
               )
               return action.tel ? (
                 <a

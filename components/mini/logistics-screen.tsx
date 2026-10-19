@@ -63,10 +63,10 @@ export function LogisticsScreen({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3 [scrollbar-width:none] *:shrink-0">
-        <section className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-primary to-[#5fa2f0] p-4 text-white">
+        <section className="flex flex-col gap-3 rounded-2xl bg-brand p-4 text-white">
           <div className="flex items-center gap-3">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white">
-              <Image src={instIcons.ship} alt="" width={36} height={36} className="size-9 object-contain mix-blend-multiply" />
+              <Image src={instIcons.ship} alt="" width={36} height={36} className="size-9 object-contain" />
             </span>
             <div className="flex min-w-0 flex-1 flex-col">
               <p className="text-title font-semibold">{latest.status}</p>
