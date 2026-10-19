@@ -79,12 +79,12 @@ export function OrderDetailScreen({
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <p className="truncate text-body font-medium text-foreground">{order.product}</p>
                 <p className="truncate text-caption text-faint">{order.spec}</p>
-                <p className="text-caption text-muted-foreground">口腔拭子采样 · 报告 5-7 个工作日</p>
+                <p className="text-caption text-muted-foreground">口腔拭子采样</p>
               </div>
             </div>
             <dl className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
               <Row label="商品金额" value={`¥${order.amount.toFixed(2)}`} />
-              <Row label="优惠" value="-¥0.00" />
+              <Row label="优惠券" value="-¥0.00" />
               <div className="flex items-center justify-between">
                 <dt className="text-note text-muted-foreground">{order.status === 'unpaid' || closed ? '应付金额' : '实付金额'}</dt>
                 <dd className="text-title font-semibold tabular-nums text-foreground">
