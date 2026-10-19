@@ -7,6 +7,7 @@ import { ActionSheet, SheetRow } from './action-sheet'
 import { InstitutionTabBar, type InstitutionTabKey } from './institution-tab-bar'
 import { NavBar, StatusBar } from './phone-frame'
 import { InstitutionSettingsScreen } from './institution-settings'
+import { LogisticsScreen } from './logistics-screen'
 import { OrderDetailScreen } from './order-detail-screen'
 import {
   SAMPLE_CODE_PATTERN,
@@ -16,6 +17,7 @@ import {
   type OrderStatus,
 } from './orders-data'
 import { OrdersScreen } from './orders-screen'
+import { ReportScreen } from './report-screen'
 import { ScanScreen } from './scan-screen'
 import { ShipBookingScreen } from './ship-booking-screen'
 import { institution, type InstitutionProfile } from './workbench-data'
@@ -28,6 +30,8 @@ export type InstitutionFlow =
   | { type: 'verify'; orderId?: string }
   | { type: 'sample'; orderId?: string }
   | { type: 'ship'; orderIds?: string[] }
+  | { type: 'logistics'; orderId: string }
+  | { type: 'report'; orderId: string }
 
 type Pending =
   | { type: 'verify'; code: string; orderId: string }
@@ -71,6 +75,8 @@ export function InstitutionApp({
     if (label === '核销订单') setFlow({ type: 'verify', orderId: order?.id })
     else if (label === '扫码采样') setFlow({ type: 'sample', orderId: order?.id })
     else if (label === '预约寄样') setFlow({ type: 'ship', orderIds: order ? [order.id] : undefined })
+    else if (label === '查看物流' && order) setFlow({ type: 'logistics', orderId: order.id })
+    else if (label === '查看报告' && order) setFlow({ type: 'report', orderId: order.id })
     else return false
     return true
   }
@@ -272,6 +278,29 @@ export function InstitutionApp({
         initialSelected={flow.orderIds}
         onBack={() => setFlow(undefined)}
         onSubmit={submitShipping}
+      />,
+    )
+  }
+
+  const logisticsOrder = flow?.type === 'logistics' ? findOrder(flow.orderId) : undefined
+  if (logisticsOrder) {
+    return shell(
+      <LogisticsScreen
+        order={logisticsOrder}
+        profile={profile}
+        onBack={() => setFlow(undefined)}
+        onCopy={() => showToast('运单号已复制')}
+      />,
+    )
+  }
+
+  const reportOrder = flow?.type === 'report' ? findOrder(flow.orderId) : undefined
+  if (reportOrder) {
+    return shell(
+      <ReportScreen
+        order={reportOrder}
+        onBack={() => setFlow(undefined)}
+        onDownload={() => showToast('报告 PDF 已开始下载')}
       />,
     )
   }

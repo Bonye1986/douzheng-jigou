@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { Check, ClipboardList, Copy, FileText } from 'lucide-react'
+import { Check, ClipboardList, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
 import {
@@ -123,25 +123,6 @@ export function OrderDetailScreen({
                 )}
               </dl>
             </Card>
-          )}
-
-          {order.status === 'done' && (
-            <button
-              type="button"
-              onClick={() => onAction?.('查看报告', order)}
-              className="flex items-center gap-3 rounded-2xl bg-white p-4 text-left shadow-sm"
-            >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-success/10 text-success">
-                <FileText className="size-5" aria-hidden="true" />
-              </span>
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="text-body font-medium text-foreground">检测报告</span>
-                <span className="text-caption text-muted-foreground">
-                  出具于 {getEventTime(order, '报告出具')}
-                </span>
-              </span>
-              <span className="text-note font-medium text-primary">查看</span>
-            </button>
           )}
 
           <Card title="订单信息">
