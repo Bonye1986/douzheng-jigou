@@ -54,11 +54,13 @@ export type ActivityItem = {
   time: string
   icon: string
   unread?: boolean
+  orderId?: string
 }
 
 export const activities: ActivityItem[] = [
   {
     id: 'a1',
+    orderId: '3',
     title: '订单核销成功',
     desc: '药物基因检测套餐 · 订单 DZ20261019088 · 受检人 李**',
     time: '10 分钟前',
@@ -67,6 +69,7 @@ export const activities: ActivityItem[] = [
   },
   {
     id: 'a2',
+    orderId: '4',
     title: '样本已绑定',
     desc: '样本编号 YB2610190231 已完成扫码采样，待寄送',
     time: '32 分钟前',
@@ -75,6 +78,7 @@ export const activities: ActivityItem[] = [
   },
   {
     id: 'a3',
+    orderId: '5',
     title: '寄样已揽收',
     desc: '顺丰 SF1402****8817 · 共 6 份样本，预计明日送达实验室',
     time: '今天 09:12',
@@ -82,6 +86,7 @@ export const activities: ActivityItem[] = [
   },
   {
     id: 'a4',
+    orderId: '6',
     title: '样本已到达实验室',
     desc: '10 月 17 日寄出的 8 份样本已签收，进入检测流程',
     time: '昨天 16:40',
@@ -89,6 +94,7 @@ export const activities: ActivityItem[] = [
   },
   {
     id: 'a5',
+    orderId: '8',
     title: '检测报告已出具',
     desc: '受检人 张** 的心血管用药基因检测报告已生成',
     time: '昨天 11:05',

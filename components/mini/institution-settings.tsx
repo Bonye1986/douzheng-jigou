@@ -17,11 +17,13 @@ export function InstitutionSettingsScreen({
   initialView = 'info',
   onBack,
   onSave,
+  onLogout,
 }: {
   profile?: InstitutionProfile
   initialView?: View
   onBack?: () => void
   onSave?: (profile: InstitutionProfile) => void
+  onLogout?: () => void
 }) {
   const [view, setView] = useState<View>(initialView)
   const [toast, setToast] = useState('')
@@ -48,6 +50,7 @@ export function InstitutionSettingsScreen({
         <InfoForm
           profile={profile}
           onOpenPassword={() => setView('password')}
+          onLogout={onLogout ?? (() => showToast('已退出登录'))}
           onSave={(next) => {
             onSave?.(next)
             showToast('机构信息已保存')
@@ -57,7 +60,8 @@ export function InstitutionSettingsScreen({
         <PasswordForm
           onDone={() => {
             showToast('密码修改成功，请重新登录')
-            if (initialView === 'info') setView('info')
+            if (onLogout) window.setTimeout(onLogout, 1200)
+            else if (initialView === 'info') setView('info')
           }}
         />
       )}
@@ -77,10 +81,12 @@ export function InstitutionSettingsScreen({
 function InfoForm({
   profile,
   onOpenPassword,
+  onLogout,
   onSave,
 }: {
   profile: InstitutionProfile
   onOpenPassword: () => void
+  onLogout: () => void
   onSave: (profile: InstitutionProfile) => void
 }) {
   const [draft, setDraft] = useState(profile)
@@ -207,6 +213,14 @@ function InfoForm({
             <ChevronRight className="size-4 text-faint" aria-hidden="true" />
           </button>
         </section>
+
+        <button
+          type="button"
+          onClick={onLogout}
+          className="h-12 w-full rounded-2xl bg-white text-body font-medium text-destructive shadow-sm active:bg-muted"
+        >
+          退出登录
+        </button>
 
         <p className="px-1 text-caption leading-5 text-faint">
           机构名称、工作时间、联系电话与地址将同步展示给用户端预约采样的受检人，请确保信息准确。

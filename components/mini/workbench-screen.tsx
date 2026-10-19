@@ -19,7 +19,7 @@ export function WorkbenchScreen({
   onAction,
 }: {
   profile?: InstitutionProfile
-  onAction?: (key: QuickActionKey | 'activity' | 'profile', label: string) => void
+  onAction?: (key: QuickActionKey | 'activity' | 'feed' | 'profile', label: string) => void
 }) {
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-background">
@@ -63,7 +63,7 @@ export function WorkbenchScreen({
             <SectionTitle id="wb-feed" title="最新动态" />
             <button
               type="button"
-              onClick={() => onAction?.('activity', '全部动态')}
+              onClick={() => onAction?.('feed', '全部动态')}
               aria-label="最新动态：查看全部"
               className="-mr-1 flex items-center gap-0.5 px-1 py-0.5 text-caption text-muted-foreground"
             >
@@ -76,7 +76,7 @@ export function WorkbenchScreen({
               <li key={id}>
                 <button
                   type="button"
-                  onClick={() => onAction?.('activity', title)}
+                  onClick={() => onAction?.('activity', id)}
                   className="flex w-full gap-3 py-3 text-left"
                 >
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(160deg,#f6f9ff_0%,#ebf2fc_100%)] ring-1 ring-inset ring-white">

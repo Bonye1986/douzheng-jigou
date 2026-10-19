@@ -16,11 +16,13 @@ export function LoginScreen({
   initialPassword = '',
   initialRemember = false,
   initialError = '',
+  onLogin,
 }: {
   initialAccount?: string
   initialPassword?: string
   initialRemember?: boolean
   initialError?: string
+  onLogin?: () => void
 }) {
   const accountId = useId()
   const passwordId = useId()
@@ -42,7 +44,7 @@ export function LoginScreen({
     window.setTimeout(() => {
       if (account.trim() === DEMO_ACCOUNT && password === DEMO_PASSWORD) {
         setStatus('success')
-        window.setTimeout(() => setStatus('idle'), 1800)
+        window.setTimeout(() => (onLogin ? onLogin() : setStatus('idle')), onLogin ? 1000 : 1800)
         return
       }
       setStatus('idle')

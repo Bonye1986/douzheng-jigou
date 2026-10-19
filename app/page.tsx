@@ -4,6 +4,7 @@ import { BrandMark } from '@/components/mini/brand'
 import { InstitutionApp } from '@/components/mini/institution-app'
 import { InstitutionSettingsScreen } from '@/components/mini/institution-settings'
 import { DEMO_ACCOUNT, DEMO_PASSWORD } from '@/components/mini/demo-credentials'
+import { InstitutionEntry } from '@/components/mini/institution-entry'
 import { LoginScreen } from '@/components/mini/login-screen'
 
 const sections: BoardSection[] = [
@@ -29,7 +30,7 @@ const sections: BoardSection[] = [
           '连续输错 5 次锁定账号 30 分钟',
           '登录成功 Toast 提示后进入机构工作台',
         ],
-        node: <LoginScreen />,
+        node: <InstitutionEntry />,
       },
       {
         id: '02',
@@ -44,7 +45,7 @@ const sections: BoardSection[] = [
           '进入页面即回填，登录按钮直接可点击',
           '点击登录后按正常流程校验，成功后进入机构工作台',
         ],
-        node: <LoginScreen initialAccount={DEMO_ACCOUNT} initialPassword={DEMO_PASSWORD} initialRemember />,
+        node: <InstitutionEntry initialAccount={DEMO_ACCOUNT} initialPassword={DEMO_PASSWORD} initialRemember />,
       },
       {
         id: '03',

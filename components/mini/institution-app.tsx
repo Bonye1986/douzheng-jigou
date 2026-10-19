@@ -23,7 +23,7 @@ import { ScanScreen } from './scan-screen'
 import { ShipBookingScreen } from './ship-booking-screen'
 import { historyOrders } from './stats-data'
 import { StatsScreen } from './stats-screen'
-import { institution, type InstitutionProfile } from './workbench-data'
+import { activities, institution, type InstitutionProfile } from './workbench-data'
 import { WorkbenchScreen } from './workbench-screen'
 
 const copiedLabels = ['订单号已复制', '样本编号已复制', '运单号已复制']
@@ -45,11 +45,13 @@ export function InstitutionApp({
   initialOrderStatus = 'all',
   initialOrderId,
   initialFlow,
+  onLogout,
 }: {
   initialTab?: InstitutionTabKey
   initialOrderStatus?: 'all' | OrderStatus
   initialOrderId?: string
   initialFlow?: InstitutionFlow
+  onLogout?: () => void
 }) {
   const [tab, setTab] = useState<InstitutionTabKey>(initialTab)
   const [profile, setProfile] = useState<InstitutionProfile>(institution)
@@ -59,6 +61,10 @@ export function InstitutionApp({
   const [flow, setFlow] = useState<InstitutionFlow | undefined>(initialFlow)
   const [pending, setPending] = useState<Pending | undefined>()
   const [pickedOrderId, setPickedOrderId] = useState<string | undefined>()
+  const [callOrder, setCallOrder] = useState<Order | undefined>()
+  const [showNotice, setShowNotice] = useState(false)
+  const [ordersKey, setOrdersKey] = useState(0)
+  const [ordersStatus, setOrdersStatus] = useState<'all' | OrderStatus>(initialOrderStatus)
   const [toast, setToast] = useState('')
   const toastTimer = useRef<number | undefined>(undefined)
 
@@ -92,6 +98,10 @@ export function InstitutionApp({
   const handleOrderAction = (label: string, order?: Order) => {
     if (label === '订单详情' && order) {
       setOrderId(order.id)
+      return
+    }
+    if (label === '联系用户' && order) {
+      setCallOrder(order)
       return
     }
     if (startFlow(label, order)) return
@@ -139,9 +149,42 @@ export function InstitutionApp({
     </div>
   )
 
+  const callSheet = callOrder && (
+    <ActionSheet
+      title="联系用户"
+      confirmLabel={`呼叫 ${callOrder.phone}`}
+      onClose={() => setCallOrder(undefined)}
+      onConfirm={() => {
+        setCallOrder(undefined)
+        showToast(`正在通过隐私号呼叫 ${callOrder.patient}`)
+      }}
+    >
+      <OrderBrief order={callOrder} />
+      <dl className="mt-2 border-t border-border pt-2">
+        <SheetRow label="受检人" value={callOrder.patient} />
+        <SheetRow label="联系电话" value={callOrder.phone} strong />
+      </dl>
+      <p className="mt-2 text-caption text-faint">为保护用户隐私，将通过平台虚拟号码接通，通话可能被录音。</p>
+    </ActionSheet>
+  )
+
+  const noticeSheet = showNotice && (
+    <ActionSheet title="平台公告" confirmLabel="我知道了" onClose={() => setShowNotice(false)} onConfirm={() => setShowNotice(false)}>
+      <h3 className="text-body font-semibold text-foreground">国庆后样本寄送时效调整说明</h3>
+      <p className="mt-1 text-caption text-muted-foreground">都正生物平台 · 10-15</p>
+      <div className="mt-3 flex flex-col gap-2 pb-2 text-note leading-6 text-foreground">
+        <p>各合作机构：</p>
+        <p>自 10 月 16 日起，实验室收样时间调整为每日 9:00 - 18:00，17:00 后预约的寄样将于次日揽收。</p>
+        <p>请在采样后 48 小时内完成寄样，样本需常温避光保存，避免挤压。如有疑问请联系平台客服。</p>
+      </div>
+    </ActionSheet>
+  )
+
   const shell = (content: React.ReactNode) => (
     <div className="relative flex h-full flex-col bg-background">
       {content}
+      {callSheet}
+      {noticeSheet}
       {toastNode}
     </div>
   )
@@ -326,7 +369,12 @@ export function InstitutionApp({
 
   if (showSettings) {
     return shell(
-      <InstitutionSettingsScreen profile={profile} onBack={() => setShowSettings(false)} onSave={setProfile} />,
+      <InstitutionSettingsScreen
+        profile={profile}
+        onBack={() => setShowSettings(false)}
+        onSave={setProfile}
+        onLogout={onLogout}
+      />,
     )
   }
 
@@ -341,11 +389,19 @@ export function InstitutionApp({
             else if (key === 'verify') setFlow({ type: 'verify' })
             else if (key === 'scan') setFlow({ type: 'sample' })
             else if (key === 'ship') setFlow({ type: 'ship' })
-            else showToast(`即将进入「${label}」`)
+            else if (key === 'feed') {
+              setOrdersStatus('all')
+              setOrdersKey((k) => k + 1)
+              setTab('orders')
+            } else if (key === 'activity') {
+              const item = activities.find((a) => a.id === label)
+              if (item?.orderId) setOrderId(item.orderId)
+              else setShowNotice(true)
+            }
           }}
         />
       ) : tab === 'orders' ? (
-        <OrdersScreen orders={orderList} initialStatus={initialOrderStatus} onAction={handleOrderAction} />
+        <OrdersScreen key={ordersKey} orders={orderList} initialStatus={ordersStatus} onAction={handleOrderAction} />
       ) : (
         <StatsScreen orders={[...orderList, ...historyList]} onOpenOrder={(order) => setOrderId(order.id)} />
       )}
