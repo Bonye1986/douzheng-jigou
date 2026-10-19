@@ -85,7 +85,8 @@ export function ReportScreen({
           <h3 className="mb-3 text-body font-semibold text-foreground">受检者信息</h3>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
             <Info label="姓名" value={order.patient} />
-            <Info label="性别 / 年龄" value={profile ? `${profile.gender} / ${profile.age} 岁` : '-'} />
+            <Info label="性别" value={profile?.gender ?? '-'} />
+  <Info label="年龄" value={profile ? `${profile.age} 岁` : '-'} />
             <Info label="样本编号" value={order.sampleCode ?? '-'} />
             <Info label="样本类型" value="口腔拭子" />
             <Info label="采样时间" value={getEventTime(order, '完成采样')?.slice(0, 10) ?? '-'} />

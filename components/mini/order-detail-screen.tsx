@@ -110,7 +110,8 @@ export function OrderDetailScreen({
           <Card title="受检人信息">
             <dl className="flex flex-col gap-2">
               <Row label="姓名" value={order.patient} />
-              <Row label="性别 / 年龄" value={`${profile.gender} / ${profile.age} 岁`} />
+              <Row label="性别" value={profile.gender} />
+  <Row label="年龄" value={`${profile.age} 岁`} />
               <Row label="手机号" value={order.phone} />
             </dl>
           </Card>
