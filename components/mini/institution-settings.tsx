@@ -194,6 +194,10 @@ function InfoForm({
           </Row>
         </section>
 
+        <p className="-mt-1 px-1 text-caption leading-5 text-faint">
+          以上信息将同步展示给用户端预约采样的受检人，请确保准确。
+        </p>
+
         <p
           id={ids.error}
           role="alert"
@@ -203,7 +207,13 @@ function InfoForm({
           {error}
         </p>
 
-        <section aria-label="账号安全" className="rounded-2xl bg-white px-4 shadow-sm">
+        <button type="submit" disabled={!dirty} className={primaryButtonClass}>
+          {dirty ? '保存修改' : '暂无修改'}
+        </button>
+
+        <h2 className="mt-3 px-1 text-caption font-medium text-muted-foreground">账号</h2>
+
+        <section aria-label="账号安全" className="-mt-1 rounded-2xl bg-white px-4 shadow-sm">
           <button type="button" onClick={onOpenPassword} className="flex h-14 w-full items-center gap-3 text-left">
             <span className="flex size-8 items-center justify-center rounded-xl bg-secondary text-primary">
               <LockKeyhole className="size-4" aria-hidden="true" />
@@ -220,16 +230,6 @@ function InfoForm({
           className="h-12 w-full rounded-2xl bg-white text-body font-medium text-destructive shadow-sm active:bg-muted"
         >
           退出登录
-        </button>
-
-        <p className="px-1 text-caption leading-5 text-faint">
-          机构名称、工作时间、联系电话与地址将同步展示给用户端预约采样的受检人，请确保信息准确。
-        </p>
-      </div>
-
-      <div className="shrink-0 px-4 pb-6 pt-3">
-        <button type="submit" disabled={!dirty} className={primaryButtonClass}>
-          保存
         </button>
       </div>
     </form>
