@@ -33,10 +33,10 @@ export const institution: InstitutionProfile = {
 }
 
 export const todayMetrics = [
-  { label: '今日核销', value: 12, unit: '单' },
-  { label: '今日采样', value: 9, unit: '例' },
-  { label: '待寄样', value: 3, unit: '份' },
-]
+  { label: '今日核销', value: 12, unit: '单', status: 'toVerify' },
+  { label: '今日采样', value: 9, unit: '例', status: 'toSample' },
+  { label: '待寄样', value: 3, unit: '份', status: 'toShip' },
+] as const
 
 export type QuickActionKey = 'verify' | 'scan' | 'ship' | 'stats'
 

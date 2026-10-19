@@ -13,13 +13,16 @@ import {
   type InstitutionProfile,
   type QuickActionKey,
 } from './workbench-data'
+import type { OrderStatus } from './orders-data'
 
 export function WorkbenchScreen({
   profile = institution,
   onAction,
+  onOpenOrders,
 }: {
   profile?: InstitutionProfile
   onAction?: (key: QuickActionKey | 'activity' | 'feed' | 'profile', label: string) => void
+  onOpenOrders?: (status: OrderStatus) => void
 }) {
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-background">
@@ -36,7 +39,11 @@ export function WorkbenchScreen({
       </div>
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-5 pt-2 [scrollbar-width:none] *:shrink-0">
-        <InstitutionCard profile={profile} onOpen={() => onAction?.('profile', '机构信息')} />
+        <InstitutionCard
+          profile={profile}
+          onOpen={() => onAction?.('profile', '机构信息')}
+          onMetric={(status) => onOpenOrders?.(status)}
+        />
 
         <section aria-labelledby="wb-quick" className="rounded-2xl bg-white p-4 shadow-sm">
           <SectionTitle id="wb-quick" title="常用功能" />
@@ -132,7 +139,15 @@ function InfoRow({
   )
 }
 
-function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onOpen: () => void }) {
+function InstitutionCard({
+  profile,
+  onOpen,
+  onMetric,
+}: {
+  profile: InstitutionProfile
+  onOpen: () => void
+  onMetric: (status: OrderStatus) => void
+}) {
   return (
     <section aria-labelledby="wb-inst" className="overflow-hidden rounded-2xl bg-white shadow-md">
       <button
@@ -189,20 +204,24 @@ function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onO
           </InfoRow>
         </span>
       </button>
-      <dl className="mx-4 grid grid-cols-3 border-t border-dashed border-border py-3.5">
+      <ul className="mx-4 grid grid-cols-3 border-t border-dashed border-border py-2">
         {todayMetrics.map((metric, index) => (
-          <div
-            key={metric.label}
-            className={cn('flex flex-col-reverse items-center gap-0.5', index > 0 && 'border-l border-border')}
-          >
-            <dt className="text-caption text-muted-foreground">{metric.label}</dt>
-            <dd className="text-headline font-bold tabular-nums tracking-tight text-foreground">
-              {metric.value}
-              <span className="ml-0.5 text-caption font-normal text-muted-foreground">{metric.unit}</span>
-            </dd>
-          </div>
+          <li key={metric.label} className={cn('flex', index > 0 && 'border-l border-border')}>
+            <button
+              type="button"
+              onClick={() => onMetric(metric.status)}
+              aria-label={`${metric.label} ${metric.value}${metric.unit}，查看订单`}
+              className="mx-1 flex flex-1 flex-col-reverse items-center gap-0.5 rounded-xl py-1.5 transition-colors active:bg-muted"
+            >
+              <span className="text-caption text-muted-foreground">{metric.label}</span>
+              <span className="text-headline font-bold tabular-nums tracking-tight text-foreground">
+                {metric.value}
+                <span className="ml-0.5 text-caption font-normal text-muted-foreground">{metric.unit}</span>
+              </span>
+            </button>
+          </li>
         ))}
-      </dl>
+      </ul>
     </section>
   )
 }

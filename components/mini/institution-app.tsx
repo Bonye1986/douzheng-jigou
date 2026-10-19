@@ -383,6 +383,11 @@ export function InstitutionApp({
       {tab === 'workbench' ? (
         <WorkbenchScreen
           profile={profile}
+          onOpenOrders={(status) => {
+            setOrdersStatus(status)
+            setOrdersKey((k) => k + 1)
+            setTab('orders')
+          }}
           onAction={(key, label) => {
             if (key === 'stats') setTab('stats')
             else if (key === 'profile') setShowSettings(true)
