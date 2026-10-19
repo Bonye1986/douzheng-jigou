@@ -1,4 +1,5 @@
 import { DesignBoard, type BoardSection } from '@/components/design/design-board'
+import { orderDetailScreens, orderListScreens } from '@/components/design/order-screens'
 import { BrandMark } from '@/components/mini/brand'
 import { InstitutionApp } from '@/components/mini/institution-app'
 import { InstitutionSettingsScreen } from '@/components/mini/institution-settings'
@@ -92,43 +93,13 @@ const sections: BoardSection[] = [
   },
   {
     key: 'orders',
-    title: '订单管理',
-    screens: [
-      {
-        id: '07',
-        title: '订单管理 · 全部',
-        desc: '底部菜单「订单管理」，按订单状态查看本机构的全部检测订单，并对订单执行核销、采样、寄样等操作',
-        features: [
-          '订单状态：全部、待付款、待核销、待采样、待寄样、待收样、待检测、检测中、已完成、已关闭，横向滑动切换',
-          '进行中的状态标签后显示订单数量，已完成 / 已关闭不显示数量',
-          '搜索：支持按订单号、用户姓名、手机号、检测项目搜索',
-          '订单卡片：订单号（可复制）、订单状态、检测项目、用户姓名与手机号（脱敏）、订单金额、样本编号或下单时间',
-          '状态颜色：待付款 / 待核销为橙色，流转中为蓝色，已完成为绿色，已关闭为灰色',
-        ],
-        interactions: [
-          '点击状态标签切换列表，标签自动滚动居中',
-          '按状态展示操作按钮：待付款「联系用户」、待核销「核销订单」、待采样「扫码采样」、待寄样「预约寄样」、待收样「查看物流」、待检测 / 检测中「查看进度」、已完成「查看报告」，已关闭无操作',
-          '点击订单卡片进入订单详情',
-          '列表下拉刷新，上拉加载更多',
-        ],
-        node: <InstitutionApp initialTab="orders" />,
-      },
-      {
-        id: '08',
-        title: '订单管理 · 待核销',
-        desc: '切换至具体状态后，列表顶部展示该状态的处理说明，引导机构完成下一步操作',
-        features: [
-          '状态说明条：如「用户到店后出示核销码，核销后进入采样」',
-          '无订单时展示空状态「暂无该状态的订单」',
-          '搜索无结果时提示「未找到与 xx 相关的订单」',
-        ],
-        interactions: [
-          '点击「核销订单」进入核销页，核销成功后订单流转至「待采样」',
-          '从工作台「订单核销」等快捷入口进入时，默认定位至对应状态',
-        ],
-        node: <InstitutionApp initialTab="orders" initialOrderStatus="toVerify" />,
-      },
-    ],
+    title: '订单列表',
+    screens: orderListScreens,
+  },
+  {
+    key: 'order-detail',
+    title: '订单详情',
+    screens: orderDetailScreens,
   },
   {
     key: 'settings',

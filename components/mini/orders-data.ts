@@ -156,3 +156,96 @@ export const orders: Order[] = [
     amount: 299,
   },
 ]
+
+export function getOrder(id: string) {
+  return orders.find((order) => order.id === id) ?? orders[0]
+}
+
+const flowIndex: Record<OrderStatus, number> = {
+  unpaid: 0,
+  toVerify: 1,
+  toSample: 2,
+  toShip: 3,
+  toReceive: 4,
+  toTest: 5,
+  testing: 6,
+  done: 7,
+  closed: -1,
+}
+
+export const progressSteps = ['付款', '核销', '采样', '寄样', '收样', '检测', '报告']
+
+export function getProgressIndex(status: OrderStatus) {
+  if (status === 'testing') return 5
+  return flowIndex[status]
+}
+
+export const patientProfiles: Record<string, { gender: '男' | '女'; age: number }> = {
+  '1': { gender: '女', age: 58 },
+  '2': { gender: '男', age: 63 },
+  '3': { gender: '男', age: 34 },
+  '4': { gender: '女', age: 29 },
+  '5': { gender: '男', age: 71 },
+  '6': { gender: '男', age: 52 },
+  '7': { gender: '女', age: 41 },
+  '8': { gender: '男', age: 66 },
+  '9': { gender: '女', age: 37 },
+}
+
+export type OrderEvent = { title: string; desc: string; time: string }
+
+const eventTemplates: { title: string; offset: number; desc: (order: Order) => string }[] = [
+  { title: '用户下单', offset: 0, desc: () => '用户在药问基因小程序提交订单' },
+  { title: '支付成功', offset: 3, desc: (o) => `微信支付 ¥${o.amount}` },
+  { title: '订单核销', offset: 30, desc: () => '用户到店出示核销码，核销人：店员 李晓' },
+  { title: '完成采样', offset: 45, desc: (o) => `口腔拭子采样，样本编号 ${o.sampleCode ?? '-'}` },
+  { title: '预约寄样', offset: 285, desc: (o) => `顺丰速运 ${trackingNo(o)}，快递员已上门取件` },
+  { title: '实验室签收', offset: 1485, desc: () => '都正生物医学检验实验室已签收样本' },
+  { title: '开始检测', offset: 1845, desc: () => '样本质检合格，已上机检测' },
+  { title: '报告出具', offset: 7605, desc: () => '检测报告已出具，用户可在小程序查看' },
+]
+
+export function trackingNo(order: Order) {
+  return `SF14${order.no.slice(-8)}`
+}
+
+function parseTime(time: string) {
+  const [md, hm] = time.split(' ')
+  const [month, day] = md.split('-').map(Number)
+  const [hour, minute] = hm.split(':').map(Number)
+  return new Date(2026, month - 1, day, hour, minute)
+}
+
+const pad = (n: number) => String(n).padStart(2, '0')
+
+export function formatTime(date: Date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+function timeAt(order: Order, offsetMinutes: number) {
+  return formatTime(new Date(parseTime(order.time).getTime() + offsetMinutes * 60_000))
+}
+
+export function getOrderEvents(order: Order): OrderEvent[] {
+  if (order.status === 'closed') {
+    return [
+      { title: '订单关闭', desc: '用户超时未支付，系统自动关闭订单', time: timeAt(order, 30) },
+      { title: '用户下单', desc: eventTemplates[0].desc(order), time: timeAt(order, 0) },
+    ]
+  }
+  return eventTemplates
+    .slice(0, flowIndex[order.status] + 1)
+    .map((t) => ({ title: t.title, desc: t.desc(order), time: timeAt(order, t.offset) }))
+    .reverse()
+}
+
+export function getEventTime(order: Order, title: string) {
+  const template = eventTemplates.find((t) => t.title === title)
+  const index = eventTemplates.findIndex((t) => t.title === title)
+  if (!template || order.status === 'closed' || flowIndex[order.status] < index) return undefined
+  return timeAt(order, template.offset)
+}
+
+export function getCloseTime(order: Order) {
+  return timeAt(order, 30)
+}
