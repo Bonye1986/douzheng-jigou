@@ -212,9 +212,10 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
         </span>
       </button>
 
+      {(order.sampleCode || actions.length > 0) && (
       <footer className="flex items-center justify-between gap-2 px-4 pb-3">
         <span className="min-w-0 truncate text-caption tabular-nums text-faint">
-          {order.sampleCode ? `样本 ${order.sampleCode}` : `下单 ${order.time}`}
+          {order.sampleCode ? `样本 ${order.sampleCode}` : null}
         </span>
         {actions.length > 0 && (
           <span className="flex shrink-0 gap-2">
@@ -236,6 +237,7 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
           </span>
         )}
       </footer>
+      )}
     </article>
   )
 }

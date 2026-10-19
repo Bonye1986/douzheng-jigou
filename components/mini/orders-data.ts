@@ -26,7 +26,7 @@ export const orderStatuses: { key: OrderStatus; label: string; tone: StatusTone;
 export type OrderAction = { label: string; primary?: boolean }
 
 export const statusActions: Record<OrderStatus, OrderAction[]> = {
-  unpaid: [{ label: '联系用户' }],
+  unpaid: [],
   toVerify: [{ label: '联系用户' }, { label: '核销订单', primary: true }],
   toSample: [{ label: '扫码采样', primary: true }],
   toShip: [{ label: '预约寄样', primary: true }],

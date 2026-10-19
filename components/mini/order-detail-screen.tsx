@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { Check, ClipboardList, Copy, FileText, Phone } from 'lucide-react'
+import { Check, ClipboardList, Copy, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
 import {
@@ -99,22 +99,7 @@ export function OrderDetailScreen({
             <dl className="flex flex-col gap-2">
               <Row label="姓名" value={order.patient} />
               <Row label="性别 / 年龄" value={`${profile.gender} / ${profile.age} 岁`} />
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-note text-muted-foreground">手机号</dt>
-                <dd className="flex items-center gap-2 text-note tabular-nums text-foreground">
-                  {order.phone}
-                  {!closed && (
-                    <button
-                      type="button"
-                      onClick={() => onAction?.('联系用户', order)}
-                      aria-label={`拨打电话联系 ${order.patient}`}
-                      className="flex size-6 items-center justify-center rounded-full bg-secondary text-primary"
-                    >
-                      <Phone className="size-3.5" aria-hidden="true" />
-                    </button>
-                  )}
-                </dd>
-              </div>
+              <Row label="手机号" value={order.phone} />
             </dl>
           </Card>
 
