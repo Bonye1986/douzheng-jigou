@@ -181,7 +181,6 @@ export const orderFlowScreens: BoardScreen[] = [
     desc: '预约顺丰医学样本专线上门取件，支持多个样本批量寄件',
     features: [
       '取件信息自动带出机构地址、联系人与电话',
-      '期望取件时间分时段选择',
       '列出全部待寄样样本，支持单选、全选，底部显示已选数量',
     ],
     interactions: [

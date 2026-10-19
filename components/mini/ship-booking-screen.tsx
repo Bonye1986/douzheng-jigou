@@ -7,8 +7,6 @@ import { NavBar, StatusBar } from './phone-frame'
 import type { Order } from './orders-data'
 import type { InstitutionProfile } from './workbench-data'
 
-export const pickupSlots = ['今天 14:00-16:00', '今天 16:00-18:00', '明天 09:00-11:00', '明天 14:00-16:00']
-
 export function ShipBookingScreen({
   orders,
   profile,
@@ -20,10 +18,9 @@ export function ShipBookingScreen({
   profile: InstitutionProfile
   initialSelected?: string[]
   onBack: () => void
-  onSubmit: (orderIds: string[], slot: string) => void
+  onSubmit: (orderIds: string[]) => void
 }) {
   const [selected, setSelected] = useState<string[]>(initialSelected ?? orders.map((o) => o.id))
-  const [slot, setSlot] = useState(pickupSlots[0])
   const allSelected = orders.length > 0 && selected.length === orders.length
 
   const toggle = (id: string) =>
@@ -54,29 +51,6 @@ export function ShipBookingScreen({
               {profile.name} · <span className="tabular-nums">{profile.phone}</span>
             </InfoLine>
           </ul>
-        </Card>
-
-        <Card title="期望取件时间">
-          <div role="radiogroup" aria-label="期望取件时间" className="grid grid-cols-2 gap-2">
-            {pickupSlots.map((value) => {
-              const active = slot === value
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  onClick={() => setSlot(value)}
-                  className={cn(
-                    'h-10 rounded-xl border text-note tabular-nums transition-colors',
-                    active ? 'border-primary bg-secondary font-medium text-primary' : 'border-border text-foreground',
-                  )}
-                >
-                  {value}
-                </button>
-              )
-            })}
-          </div>
         </Card>
 
         <section className="rounded-2xl bg-white p-4 shadow-sm">
@@ -146,7 +120,7 @@ export function ShipBookingScreen({
         <button
           type="button"
           disabled={selected.length === 0}
-          onClick={() => onSubmit(selected, slot)}
+          onClick={() => onSubmit(selected)}
           className={cn(
             'h-10 min-w-32 rounded-full px-5 text-body font-medium text-white transition-transform active:scale-95',
             selected.length === 0

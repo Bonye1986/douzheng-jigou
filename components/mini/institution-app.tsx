@@ -108,12 +108,12 @@ export function InstitutionApp({
     showToast('样本已绑定订单')
   }
 
-  const submitShipping = (ids: string[], slot: string) => {
+  const submitShipping = (ids: string[]) => {
     const time = nowText()
     const tracking = `SF14${Date.now().toString().slice(-10)}`
     updateOrders(ids, (o) => ({ status: 'toReceive', tracking, records: { ...o.records, 预约寄样: time } }))
     setFlow(undefined)
-    showToast(`已预约 ${ids.length} 件样本，快递员将于${slot}上门取件`)
+    showToast(`已预约 ${ids.length} 件样本，快递员将尽快上门取件`)
   }
 
   const toastNode = toast && (
