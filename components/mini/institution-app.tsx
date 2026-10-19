@@ -1,14 +1,22 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { ChartColumn, ClipboardList, type LucideIcon } from 'lucide-react'
+import { ChartColumn, type LucideIcon } from 'lucide-react'
 import { InstitutionTabBar, type InstitutionTabKey } from './institution-tab-bar'
 import { NavBar, StatusBar } from './phone-frame'
 import { InstitutionSettingsScreen } from './institution-settings'
+import type { OrderStatus } from './orders-data'
+import { OrdersScreen } from './orders-screen'
 import { institution, type InstitutionProfile } from './workbench-data'
 import { WorkbenchScreen } from './workbench-screen'
 
-export function InstitutionApp({ initialTab = 'workbench' }: { initialTab?: InstitutionTabKey }) {
+export function InstitutionApp({
+  initialTab = 'workbench',
+  initialOrderStatus = 'all',
+}: {
+  initialTab?: InstitutionTabKey
+  initialOrderStatus?: 'all' | OrderStatus
+}) {
   const [tab, setTab] = useState<InstitutionTabKey>(initialTab)
   const [profile, setProfile] = useState<InstitutionProfile>(institution)
   const [showSettings, setShowSettings] = useState(false)
@@ -51,7 +59,10 @@ export function InstitutionApp({ initialTab = 'workbench' }: { initialTab?: Inst
           }}
         />
       ) : tab === 'orders' ? (
-        <TabPlaceholder title="订单管理" icon={ClipboardList} />
+        <OrdersScreen
+          initialStatus={initialOrderStatus}
+          onAction={(label) => showToast(label === '订单号已复制' ? label : `即将进入「${label}」`)}
+        />
       ) : (
         <TabPlaceholder title="数据统计" icon={ChartColumn} />
       )}
