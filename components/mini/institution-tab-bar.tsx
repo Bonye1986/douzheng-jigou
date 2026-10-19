@@ -1,8 +1,9 @@
-import { ChartColumn, LayoutGrid, type LucideIcon } from 'lucide-react'
+import { ChartColumn, ClipboardList, LayoutGrid, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export const institutionTabs = [
   { key: 'workbench', label: '工作台', icon: LayoutGrid },
+  { key: 'orders', label: '订单管理', icon: ClipboardList },
   { key: 'stats', label: '数据统计', icon: ChartColumn },
 ] as const satisfies readonly { key: string; label: string; icon: LucideIcon }[]
 

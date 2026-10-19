@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { ChartColumn } from 'lucide-react'
+import { ChartColumn, ClipboardList, type LucideIcon } from 'lucide-react'
 import { InstitutionTabBar, type InstitutionTabKey } from './institution-tab-bar'
 import { NavBar, StatusBar } from './phone-frame'
 import { WorkbenchScreen } from './workbench-screen'
@@ -29,8 +29,10 @@ export function InstitutionApp({ initialTab = 'workbench' }: { initialTab?: Inst
             showToast(`即将进入「${label}」`)
           }}
         />
+      ) : tab === 'orders' ? (
+        <TabPlaceholder title="订单管理" icon={ClipboardList} />
       ) : (
-        <StatsPlaceholder />
+        <TabPlaceholder title="数据统计" icon={ChartColumn} />
       )}
       <InstitutionTabBar active={tab} onSelect={setTab} />
 
@@ -46,16 +48,16 @@ export function InstitutionApp({ initialTab = 'workbench' }: { initialTab?: Inst
   )
 }
 
-function StatsPlaceholder() {
+function TabPlaceholder({ title, icon: Icon }: { title: string; icon: LucideIcon }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <StatusBar />
-      <NavBar title="数据统计" />
+      <NavBar title={title} />
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
         <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-primary">
-          <ChartColumn className="size-7" aria-hidden="true" />
+          <Icon className="size-7" aria-hidden="true" />
         </span>
-        <p className="text-title font-medium text-foreground">数据统计</p>
+        <p className="text-title font-medium text-foreground">{title}</p>
         <p className="text-note text-muted-foreground">该页面将在后续版本中设计</p>
       </div>
     </div>
