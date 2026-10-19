@@ -110,21 +110,26 @@ function InfoForm({
     return ''
   }
 
+  const commit = () => {
+    if (!dirty) return
+    const message = validate()
+    if (message) {
+      setError(message)
+      return
+    }
+    const next = { ...draft, name: draft.name.trim(), phone: draft.phone.trim(), address: draft.address.trim() }
+    setDraft(next)
+    setSaved(next)
+    onSave(next)
+  }
+
   return (
     <form
       noValidate
       className="flex min-h-0 flex-1 flex-col"
       onSubmit={(event) => {
         event.preventDefault()
-        const message = validate()
-        if (message) {
-          setError(message)
-          return
-        }
-        const next = { ...draft, name: draft.name.trim(), phone: draft.phone.trim(), address: draft.address.trim() }
-        setDraft(next)
-        setSaved(next)
-        onSave(next)
+        commit()
       }}
     >
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-4 pt-3 [scrollbar-width:none] *:shrink-0">
@@ -140,12 +145,18 @@ function InfoForm({
               maxLength={30}
               placeholder="请输入机构名称"
               onChange={(event) => update('name', event.target.value)}
+              onBlur={commit}
               className={fieldClass}
             />
           </Row>
 
           <Row label="工作时间" htmlFor={ids.open}>
-            <div className="flex items-center justify-end gap-2">
+            <div
+              className="flex items-center justify-end gap-2"
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) commit()
+              }}
+            >
               <input
                 id={ids.open}
                 type="time"
@@ -177,6 +188,7 @@ function InfoForm({
               value={draft.phone}
               placeholder="手机号或座机号"
               onChange={(event) => update('phone', event.target.value)}
+              onBlur={commit}
               className={fieldClass}
             />
           </Row>
@@ -189,6 +201,7 @@ function InfoForm({
               value={draft.address}
               placeholder="请输入详细地址"
               onChange={(event) => update('address', event.target.value)}
+              onBlur={commit}
               className={cn(fieldClass, 'resize-none leading-5')}
             />
           </Row>
@@ -207,10 +220,6 @@ function InfoForm({
           {error}
         </p>
 
-        <button type="submit" disabled={!dirty} className={primaryButtonClass}>
-          {dirty ? '保存修改' : '暂无修改'}
-        </button>
-
         <h2 className="mt-3 px-1 text-caption font-medium text-muted-foreground">账号</h2>
 
         <section aria-label="账号安全" className="-mt-1 rounded-2xl bg-white px-4 shadow-sm">
@@ -223,7 +232,9 @@ function InfoForm({
             <ChevronRight className="size-4 text-faint" aria-hidden="true" />
           </button>
         </section>
+      </div>
 
+      <footer className="shrink-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2">
         <button
           type="button"
           onClick={onLogout}
@@ -231,7 +242,7 @@ function InfoForm({
         >
           退出登录
         </button>
-      </div>
+      </footer>
     </form>
   )
 }
