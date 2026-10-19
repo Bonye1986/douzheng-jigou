@@ -20,6 +20,8 @@ import { OrdersScreen } from './orders-screen'
 import { ReportScreen } from './report-screen'
 import { ScanScreen } from './scan-screen'
 import { ShipBookingScreen } from './ship-booking-screen'
+import { historyOrders } from './stats-data'
+import { StatsScreen } from './stats-screen'
 import { institution, type InstitutionProfile } from './workbench-data'
 import { WorkbenchScreen } from './workbench-screen'
 
@@ -59,7 +61,9 @@ export function InstitutionApp({
   const [toast, setToast] = useState('')
   const toastTimer = useRef<number | undefined>(undefined)
 
-  const findOrder = (id?: string) => orderList.find((o) => o.id === id)
+  const [historyList, setHistoryList] = useState<Order[]>(historyOrders)
+
+  const findOrder = (id?: string) => orderList.find((o) => o.id === id) ?? historyList.find((o) => o.id === id)
   const byStatus = (status: OrderStatus) => orderList.filter((o) => o.status === status)
 
   const showToast = (message: string) => {
@@ -68,8 +72,11 @@ export function InstitutionApp({
     toastTimer.current = window.setTimeout(() => setToast(''), 1800)
   }
 
-  const updateOrders = (ids: string[], patch: (order: Order) => Partial<Order>) =>
-    setOrderList((list) => list.map((o) => (ids.includes(o.id) ? { ...o, ...patch(o) } : o)))
+  const updateOrders = (ids: string[], patch: (order: Order) => Partial<Order>) => {
+    const apply = (list: Order[]) => list.map((o) => (ids.includes(o.id) ? { ...o, ...patch(o) } : o))
+    setOrderList(apply)
+    setHistoryList(apply)
+  }
 
   const startFlow = (label: string, order?: Order) => {
     if (label === '核销订单') setFlow({ type: 'verify', orderId: order?.id })
@@ -339,7 +346,7 @@ export function InstitutionApp({
       ) : tab === 'orders' ? (
         <OrdersScreen orders={orderList} initialStatus={initialOrderStatus} onAction={handleOrderAction} />
       ) : (
-        <TabPlaceholder title="数据统计" icon={ChartColumn} />
+        <StatsScreen orders={[...orderList, ...historyList]} onOpenOrder={(order) => setOrderId(order.id)} />
       )}
       <InstitutionTabBar active={tab} onSelect={setTab} />
     </>,

@@ -217,37 +217,57 @@ export function OrderDetailScreen({
 }
 
 function ProgressCard({ progress, done }: { progress: number; done: boolean }) {
+  const total = progressSteps.length
+  const completedCount = done ? total : progress
   return (
-    <section aria-label="服务进度" className="rounded-2xl bg-white px-3 py-4 shadow-sm">
+    <section aria-label="服务进度" className="rounded-2xl bg-white px-4 pb-4 pt-3.5 shadow-sm">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-body font-semibold text-foreground">服务进度</h3>
+        <span className="text-caption text-muted-foreground">
+          {done ? (
+            <span className="inline-flex items-center gap-1 font-medium text-success">
+              <Check className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
+              全部完成
+            </span>
+          ) : (
+            <>
+              当前 <span className="font-semibold text-primary">{progressSteps[progress]}</span>
+              <span className="mx-1.5 text-faint">·</span>
+              {completedCount}/{total}
+            </>
+          )}
+        </span>
+      </div>
       <ol className="flex">
         {progressSteps.map((step, index) => {
           const finished = done || index < progress
           const current = !done && index === progress
           return (
-            <li key={step} className="relative flex flex-1 flex-col items-center gap-1.5">
+            <li key={step} className="relative flex flex-1 flex-col items-center gap-2">
               {index > 0 && (
                 <span
                   aria-hidden="true"
                   className={cn(
-                    'absolute right-1/2 top-[9px] h-0.5 w-[calc(100%-20px)] -translate-x-[10px]',
+                    'absolute right-1/2 top-[7px] h-[2px] w-full rounded-full',
                     finished || current ? 'bg-primary' : 'bg-border',
                   )}
                 />
               )}
-              <span
-                className={cn(
-                  'relative flex size-5 items-center justify-center rounded-full text-[10px] font-semibold',
-                  finished && 'bg-primary text-white',
-                  current && 'bg-white text-primary ring-2 ring-primary',
-                  !finished && !current && 'bg-muted text-faint',
-                )}
-              >
-                {finished ? <Check className="size-3" strokeWidth={3} aria-hidden="true" /> : index + 1}
+              <span aria-hidden="true" className="relative flex size-4 items-center justify-center">
+                {current && <span className="absolute inset-0 rounded-full bg-primary/20" />}
+                <span
+                  className={cn(
+                    'relative rounded-full',
+                    finished && 'size-2.5 bg-primary',
+                    current && 'size-2.5 bg-primary ring-2 ring-white',
+                    !finished && !current && 'size-2 bg-border',
+                  )}
+                />
               </span>
               <span
                 className={cn(
-                  'text-caption',
-                  current ? 'font-semibold text-primary' : finished ? 'text-foreground' : 'text-faint',
+                  'text-[11px] leading-none',
+                  current ? 'font-semibold text-primary' : finished ? 'text-muted-foreground' : 'text-faint',
                 )}
               >
                 {step}

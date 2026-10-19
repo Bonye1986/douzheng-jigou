@@ -213,7 +213,7 @@ function InfoForm({
         </p>
       </div>
 
-      <div className="shrink-0 bg-white px-4 pb-6 pt-3 shadow-[0_-4px_16px_#1f3a6608]">
+      <div className="shrink-0 px-4 pb-6 pt-3">
         <button type="submit" disabled={!dirty} className={primaryButtonClass}>
           保存
         </button>
@@ -292,8 +292,8 @@ function PasswordForm({ onDone }: { onDone: () => void }) {
         </ul>
       </div>
 
-      <div className="shrink-0 bg-white px-4 pb-6 pt-3 shadow-[0_-4px_16px_#1f3a6608]">
-        <button type="submit" disabled={!canSubmit} className={primaryButtonClass}>
+  <div className="shrink-0 px-4 pb-6 pt-3">
+  <button type="submit" disabled={!canSubmit} className={primaryButtonClass}>
           确认修改
         </button>
       </div>
