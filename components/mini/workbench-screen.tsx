@@ -110,6 +110,24 @@ export function WorkbenchScreen({
   )
 }
 
+function InfoRow({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: typeof Clock
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <span className="flex min-w-0 items-center gap-2 text-caption">
+      <Icon className="size-3.5 shrink-0 text-primary/70" aria-hidden="true" />
+      <span className="w-14 shrink-0 text-muted-foreground">{label}</span>
+      <span className="flex min-w-0 flex-1 items-center gap-2 font-medium text-foreground">{children}</span>
+    </span>
+  )
+}
+
 function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onOpen: () => void }) {
   const TypeIcon = profile.type === '药店' ? Pill : Stethoscope
   return (
@@ -118,38 +136,42 @@ function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onO
         type="button"
         onClick={onOpen}
         aria-label={`${profile.name}，进入机构设置`}
-        className="flex w-full items-start gap-3 p-4 text-left"
+        className="flex w-full flex-col gap-3 p-4 text-left transition-colors active:bg-secondary/40"
       >
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-[#5fa2f0] text-white">
-          <TypeIcon className="size-6" aria-hidden="true" />
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className="flex items-center gap-1.5">
-            <span id="wb-inst" className="truncate text-title font-bold text-foreground">
-              {profile.name}
-            </span>
-            <span className="shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-tag font-medium text-primary">
-              {profile.type}
-            </span>
+        <span className="flex w-full items-center gap-3">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-[#5fa2f0] text-white shadow-[0_4px_12px_#3a82e440]">
+            <TypeIcon className="size-6" aria-hidden="true" />
           </span>
-          <span className="mt-0.5 text-caption text-muted-foreground">机构编号 {profile.code}</span>
-          <span className="mt-2 flex items-center gap-1 text-caption text-muted-foreground">
-            <Clock className="size-3.5 shrink-0 text-faint" aria-hidden="true" />
-            <span className="sr-only">工作时间</span>
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span id="wb-inst" className="truncate text-title font-bold text-foreground">
+                {profile.name}
+              </span>
+              <span className="shrink-0 rounded-md bg-secondary px-1.5 py-px text-tag font-medium text-primary">
+                {profile.type}
+              </span>
+            </span>
+            <span className="text-caption tabular-nums text-faint">编号 {profile.code}</span>
+          </span>
+          <ChevronRight className="size-4 shrink-0 text-faint" aria-hidden="true" />
+        </span>
+
+        <span className="flex w-full flex-col gap-2.5 rounded-xl bg-[#f5f8fd] px-3 py-3">
+          <InfoRow icon={Clock} label="营业时间">
             <span className="tabular-nums">
-              每日 {profile.openTime} - {profile.closeTime}
+              {profile.openTime} - {profile.closeTime}
             </span>
-          </span>
-          <span className="mt-1 flex items-center gap-1 text-caption text-muted-foreground">
-            <Phone className="size-3.5 shrink-0 text-faint" aria-hidden="true" />
+            <span className="ml-auto shrink-0 rounded-full bg-success-soft px-2 py-px text-tag font-medium text-success">
+              营业中
+            </span>
+          </InfoRow>
+          <InfoRow icon={Phone} label="联系电话">
             <span className="tabular-nums">{profile.phone}</span>
-          </span>
-          <span className="mt-1 flex items-center gap-1 text-caption text-muted-foreground">
-            <MapPin className="size-3.5 shrink-0 text-faint" aria-hidden="true" />
+          </InfoRow>
+          <InfoRow icon={MapPin} label="机构地址">
             <span className="truncate">{profile.address}</span>
-          </span>
+          </InfoRow>
         </span>
-        <ChevronRight className="mt-3.5 size-4 shrink-0 text-faint" aria-hidden="true" />
       </button>
       <dl className="grid grid-cols-3 border-t border-border bg-[linear-gradient(180deg,#f7faff,#fff)] py-3">
         {todayMetrics.map((metric, index) => (
