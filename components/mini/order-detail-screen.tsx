@@ -1,9 +1,11 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { Check, ClipboardList, Copy } from 'lucide-react'
+import Image from 'next/image'
+import { Check, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
+import { getProductImage } from './orders-data'
 import {
   getCloseTime,
   getEventTime,
@@ -69,14 +71,13 @@ export function OrderDetailScreen({
 
           <Card title="检测项目">
             <div className="flex items-center gap-3">
-              <span
-                className={cn(
-                  'flex size-14 shrink-0 items-center justify-center rounded-xl',
-                  closed ? 'bg-muted text-faint' : 'bg-gradient-to-br from-[#e3efff] to-[#f1f7ff] text-primary',
-                )}
-              >
-                <ClipboardList className="size-6" aria-hidden="true" />
-              </span>
+              <Image
+                src={getProductImage(order.product) || '/placeholder.svg'}
+                alt=""
+                width={112}
+                height={112}
+                className={cn('size-14 shrink-0 rounded-xl bg-secondary object-cover', closed && 'opacity-50 grayscale')}
+              />
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <p className="truncate text-body font-medium text-foreground">{order.product}</p>
                 <p className="truncate text-caption text-faint">{order.spec}</p>

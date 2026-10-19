@@ -7,12 +7,12 @@ export const instIcons = {
   report: '/images/icons/mine-report.png',
   sample: '/images/icons/mine-tosample.png',
   notice: '/images/icons/inst-notice.png',
-  clinic: '/images/icons/inst-clinic.png',
-  pharmacy: '/images/icons/inst-pharmacy.png',
 } as const
 
 export type InstitutionProfile = {
   name: string
+  /** Logo uploaded by the institution in the admin backend; falls back to the name initial. */
+  logo?: string
   type: '诊所' | '药店'
   code: string
   openTime: string
@@ -23,6 +23,7 @@ export type InstitutionProfile = {
 
 export const institution: InstitutionProfile = {
   name: '仁和堂中西医结合诊所',
+  logo: '/images/inst-logo-renhetang.png',
   type: '诊所',
   code: 'JG-430102-0018',
   openTime: '08:00',

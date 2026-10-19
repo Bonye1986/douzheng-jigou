@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 
 export const institutionTabs = [
   { key: 'workbench', label: '工作台', icon: '/images/icons/inst-workbench.png' },
-  { key: 'orders', label: '订单管理', icon: '/images/icons/sec-orders.png' },
+  { key: 'orders', label: '订单管理', icon: '/images/icons/inst-orders.png' },
   { key: 'stats', label: '数据统计', icon: '/images/icons/inst-stats.png' },
 ] as const
 

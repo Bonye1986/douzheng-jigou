@@ -56,6 +56,16 @@ export type Order = {
   records?: Record<string, string>
 }
 
+const productImageRules: [RegExp, string][] = [
+  [/心脑血管/, '/images/products/cardio.png'],
+  [/精神/, '/images/products/mental.png'],
+  [/高血压|糖尿病/, '/images/products/chronic.png'],
+]
+
+export function getProductImage(product: string) {
+  return productImageRules.find(([rule]) => rule.test(product))?.[1] ?? '/images/products/full.png'
+}
+
 export const SAMPLE_CODE_PATTERN = /^YW\d{10}$/
 
 export const orders: Order[] = [

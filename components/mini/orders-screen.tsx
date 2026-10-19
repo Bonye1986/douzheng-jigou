@@ -1,10 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ChevronRight, ClipboardList, Copy, Search, X } from 'lucide-react'
+import Image from 'next/image'
+import { ChevronRight, Copy, Search, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
 import {
+  getProductImage,
   orderStatuses,
   statusActions,
   type Order,
@@ -185,14 +187,13 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
         aria-label={`查看订单 ${order.no} 详情`}
         className="flex w-full items-center gap-3 px-4 py-3 text-left"
       >
-        <span
-          className={cn(
-            'flex size-14 shrink-0 items-center justify-center rounded-xl',
-            closed ? 'bg-muted text-faint' : 'bg-gradient-to-br from-[#e3efff] to-[#f1f7ff] text-primary',
-          )}
-        >
-          <ClipboardList className="size-6" aria-hidden="true" />
-        </span>
+        <Image
+          src={getProductImage(order.product) || '/placeholder.svg'}
+          alt=""
+          width={112}
+          height={112}
+          className={cn('size-14 shrink-0 rounded-xl bg-secondary object-cover', closed && 'opacity-50 grayscale')}
+        />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className={cn('truncate text-body font-medium', closed ? 'text-muted-foreground' : 'text-foreground')}>
             {order.product}
@@ -258,9 +259,7 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
 function EmptyState({ keyword }: { keyword: string }) {
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
-      <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-primary">
-        <ClipboardList className="size-7" aria-hidden="true" />
-      </span>
+      <Image src="/images/icons/inst-orders.png" alt="" width={128} height={128} className="size-16 object-contain" />
       <p className="text-body text-muted-foreground">
         {keyword ? `未找到与「${keyword}」相关的订单` : '暂无该状态的订单'}
       </p>

@@ -141,7 +141,6 @@ function InfoRow({
 }
 
 function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onOpen: () => void }) {
-  const typeIcon = profile.type === '药店' ? instIcons.pharmacy : instIcons.clinic
   return (
     <section aria-labelledby="wb-inst" className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_#3a82e41a]">
       <button
@@ -151,15 +150,22 @@ function InstitutionCard({ profile, onOpen }: { profile: InstitutionProfile; onO
         className="flex w-full flex-col gap-3 p-4 text-left transition-colors active:bg-secondary/40"
       >
         <span className="flex w-full items-center gap-3">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[#f3f7fd]">
+          {profile.logo ? (
             <Image
-              src={typeIcon}
-              alt=""
-              width={44}
-              height={44}
-              className="size-11 object-contain mix-blend-multiply"
+              src={profile.logo || '/placeholder.svg'}
+              alt={`${profile.name} logo`}
+              width={96}
+              height={96}
+              className="size-12 shrink-0 rounded-2xl border border-border bg-white object-cover"
             />
-          </span>
+          ) : (
+            <span
+              aria-hidden="true"
+              className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-secondary text-title font-bold text-primary"
+            >
+              {profile.name.slice(0, 1)}
+            </span>
+          )}
           <span className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="flex min-w-0 items-center gap-1.5">
               <span id="wb-inst" className="truncate text-title font-bold text-foreground">
