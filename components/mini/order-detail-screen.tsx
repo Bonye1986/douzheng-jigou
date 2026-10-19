@@ -76,7 +76,7 @@ export function OrderDetailScreen({
           </p>
         </section>
 
-        <div className="-mt-8 flex flex-col gap-3 px-4 pb-4">
+        <div className="relative z-10 -mt-8 flex flex-col gap-3 px-4 pb-4">
           {!closed && <ProgressCard progress={progress} done={order.status === 'done'} />}
 
           <Card title="检测项目">
@@ -260,20 +260,29 @@ function ProgressCard({ progress, done }: { progress: number; done: boolean }) {
                   aria-hidden="true"
                   className={cn(
                     'absolute right-1/2 top-[7px] h-[2px] w-full rounded-full',
-                    finished || current ? 'bg-primary' : 'bg-border',
+                    done ? 'bg-success' : finished || current ? 'bg-primary' : 'bg-border',
                   )}
                 />
               )}
               <span aria-hidden="true" className="relative flex size-4 items-center justify-center">
-                {current && <span className="absolute inset-0 rounded-full bg-primary/20" />}
-                <span
-                  className={cn(
-                    'relative rounded-full',
-                    finished && 'size-2.5 bg-primary',
-                    current && 'size-2.5 bg-primary ring-2 ring-white',
-                    !finished && !current && 'size-2 bg-border',
-                  )}
-                />
+                {current && <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />}
+                {finished ? (
+                  <span
+                    className={cn(
+                      'relative flex size-4 items-center justify-center rounded-full text-white',
+                      done ? 'bg-success' : 'bg-primary',
+                    )}
+                  >
+                    <Check className="size-2.5" strokeWidth={3.5} />
+                  </span>
+                ) : (
+                  <span
+                    className={cn(
+                      'relative rounded-full',
+                      current ? 'size-3 bg-primary ring-[3px] ring-primary/25' : 'size-2 bg-border',
+                    )}
+                  />
+                )}
               </span>
               <span
                 className={cn(
