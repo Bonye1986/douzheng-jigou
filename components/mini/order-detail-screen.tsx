@@ -237,7 +237,7 @@ function ProgressCard({ progress, done }: { progress: number; done: boolean }) {
         <h3 className="text-body font-semibold text-foreground">服务进度</h3>
         <span className="text-caption text-muted-foreground">
           {done ? (
-            <span className="inline-flex items-center gap-1 font-medium text-success">
+            <span className="inline-flex items-center gap-1 font-medium text-primary">
               <Check className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
               全部完成
             </span>
@@ -261,7 +261,7 @@ function ProgressCard({ progress, done }: { progress: number; done: boolean }) {
                   aria-hidden="true"
                   className={cn(
                     'absolute right-1/2 top-[7px] z-0 h-[2px] w-full rounded-full',
-                    done ? 'bg-success' : finished || current ? 'bg-primary' : 'bg-border',
+                    finished || current ? 'bg-primary' : 'bg-border',
                   )}
                 />
               )}
@@ -269,10 +269,7 @@ function ProgressCard({ progress, done }: { progress: number; done: boolean }) {
                 {current && <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />}
                 {finished ? (
                   <span
-                    className={cn(
-                      'relative flex size-4 items-center justify-center rounded-full text-white',
-                      done ? 'bg-success' : 'bg-primary',
-                    )}
+                    className="relative flex size-4 items-center justify-center rounded-full bg-primary text-white"
                   >
                     <Check className="size-2.5" strokeWidth={3.5} />
                   </span>
