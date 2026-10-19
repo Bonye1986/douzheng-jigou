@@ -260,12 +260,12 @@ function ProgressCard({ progress, done }: { progress: number; done: boolean }) {
                 <span
                   aria-hidden="true"
                   className={cn(
-                    'absolute right-1/2 top-[7px] h-[2px] w-full rounded-full',
+                    'absolute right-1/2 top-[7px] z-0 h-[2px] w-full rounded-full',
                     done ? 'bg-success' : finished || current ? 'bg-primary' : 'bg-border',
                   )}
                 />
               )}
-              <span aria-hidden="true" className="relative flex size-4 items-center justify-center">
+              <span aria-hidden="true" className="relative z-10 flex size-4 items-center justify-center">
                 {current && <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />}
                 {finished ? (
                   <span
