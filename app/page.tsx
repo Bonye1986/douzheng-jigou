@@ -1,5 +1,5 @@
 import { DesignBoard, type BoardSection } from '@/components/design/design-board'
-import { orderDetailScreens, orderListScreens } from '@/components/design/order-screens'
+import { orderDetailScreens, orderFlowScreens, orderListScreens } from '@/components/design/order-screens'
 import { BrandMark } from '@/components/mini/brand'
 import { InstitutionApp } from '@/components/mini/institution-app'
 import { InstitutionSettingsScreen } from '@/components/mini/institution-settings'
@@ -100,6 +100,11 @@ const sections: BoardSection[] = [
     key: 'order-detail',
     title: '订单详情',
     screens: orderDetailScreens,
+  },
+  {
+    key: 'order-flow',
+    title: '订单操作',
+    screens: orderFlowScreens,
   },
   {
     key: 'settings',

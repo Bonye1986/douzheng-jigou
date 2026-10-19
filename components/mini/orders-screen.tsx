@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
 import {
   orderStatuses,
-  orders,
   statusActions,
   type Order,
   type OrderStatus,
@@ -28,9 +27,11 @@ const statusMap = Object.fromEntries(orderStatuses.map((s) => [s.key, s])) as Re
 >
 
 export function OrdersScreen({
+  orders,
   initialStatus = 'all',
   onAction,
 }: {
+  orders: Order[]
   initialStatus?: FilterKey
   onAction?: (label: string, order?: Order) => void
 }) {
@@ -41,7 +42,7 @@ export function OrdersScreen({
     const map: Partial<Record<FilterKey, number>> = { all: orders.length }
     for (const order of orders) map[order.status] = (map[order.status] ?? 0) + 1
     return map
-  }, [])
+  }, [orders])
 
   const list = useMemo(() => {
     const q = keyword.trim().toLowerCase()
@@ -50,7 +51,7 @@ export function OrdersScreen({
       if (!q) return true
       return [order.no, order.patient, order.phone, order.product].some((v) => v.toLowerCase().includes(q))
     })
-  }, [filter, keyword])
+  }, [orders, filter, keyword])
 
   const tabs: { key: FilterKey; label: string }[] = [{ key: 'all', label: '全部' }, ...orderStatuses]
 
@@ -219,21 +220,33 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
         </span>
         {actions.length > 0 && (
           <span className="flex shrink-0 gap-2">
-            {actions.map((action) => (
-              <button
-                key={action.label}
-                type="button"
-                onClick={() => onAction?.(action.label, order)}
-                className={cn(
-                  'h-7 rounded-full px-3.5 text-caption font-medium transition-transform active:scale-95',
-                  action.primary
-                    ? 'bg-gradient-to-r from-primary to-[#5fa2f0] text-white shadow-[0_2px_8px_#3a82e440]'
-                    : 'border border-border text-foreground',
-                )}
-              >
-                {action.label}
-              </button>
-            ))}
+            {actions.map((action) => {
+              const className = cn(
+                'flex h-7 items-center rounded-full px-3.5 text-caption font-medium transition-transform active:scale-95',
+                action.primary
+                  ? 'bg-gradient-to-r from-primary to-[#5fa2f0] text-white shadow-[0_2px_8px_#3a82e440]'
+                  : 'border border-border text-foreground',
+              )
+              return action.tel ? (
+                <a
+                  key={action.label}
+                  href={`tel:${order.mobile}`}
+                  aria-label={`拨打 ${order.patient} 的电话`}
+                  className={className}
+                >
+                  {action.label}
+                </a>
+              ) : (
+                <button
+                  key={action.label}
+                  type="button"
+                  onClick={() => onAction?.(action.label, order)}
+                  className={className}
+                >
+                  {action.label}
+                </button>
+              )
+            })}
           </span>
         )}
       </footer>

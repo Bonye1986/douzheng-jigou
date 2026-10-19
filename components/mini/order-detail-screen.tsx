@@ -9,6 +9,7 @@ import {
   getEventTime,
   getOrderEvents,
   getProgressIndex,
+  getVerifier,
   orderStatuses,
   patientProfiles,
   progressSteps,
@@ -154,7 +155,10 @@ export function OrderDetailScreen({
                 </>
               )}
               {getEventTime(order, '订单核销') && (
-                <Row label="核销时间" value={getEventTime(order, '订单核销') ?? '-'} />
+                <>
+                  <Row label="核销时间" value={getEventTime(order, '订单核销') ?? '-'} />
+                  <Row label="核销人员" value={getVerifier(order)} />
+                </>
               )}
               {closed && <Row label="关闭原因" value="超时未支付" />}
             </dl>
@@ -203,21 +207,28 @@ export function OrderDetailScreen({
 
       {actions.length > 0 && (
         <footer className="flex shrink-0 items-center justify-end gap-2.5 border-t border-border bg-white px-4 pb-7 pt-2.5">
-          {actions.map((action) => (
-            <button
-              key={action.label}
-              type="button"
-              onClick={() => onAction?.(action.label, order)}
-              className={cn(
-                'h-10 rounded-full px-5 text-body font-medium transition-transform active:scale-95',
-                action.primary
-                  ? 'min-w-28 bg-gradient-to-r from-primary to-[#5fa2f0] text-white shadow-[0_4px_12px_#3a82e440]'
-                  : 'border border-border text-foreground',
-              )}
-            >
-              {action.label}
-            </button>
-          ))}
+          {actions.map((action) => {
+            const className = cn(
+              'flex h-10 items-center justify-center rounded-full px-5 text-body font-medium transition-transform active:scale-95',
+              action.primary
+                ? 'min-w-28 bg-gradient-to-r from-primary to-[#5fa2f0] text-white shadow-[0_4px_12px_#3a82e440]'
+                : 'border border-border text-foreground',
+            )
+            return action.tel ? (
+              <a
+                key={action.label}
+                href={`tel:${order.mobile}`}
+                aria-label={`拨打 ${order.patient} 的电话`}
+                className={className}
+              >
+                {action.label}
+              </a>
+            ) : (
+              <button key={action.label} type="button" onClick={() => onAction?.(action.label, order)} className={className}>
+                {action.label}
+              </button>
+            )
+          })}
         </footer>
       )}
     </div>
