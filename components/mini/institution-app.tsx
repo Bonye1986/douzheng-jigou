@@ -62,7 +62,6 @@ export function InstitutionApp({
   const [pending, setPending] = useState<Pending | undefined>()
   const [pickedOrderId, setPickedOrderId] = useState<string | undefined>()
   const [callOrder, setCallOrder] = useState<Order | undefined>()
-  const [showNotice, setShowNotice] = useState(false)
   const [ordersKey, setOrdersKey] = useState(0)
   const [ordersStatus, setOrdersStatus] = useState<'all' | OrderStatus>(initialOrderStatus)
   const [toast, setToast] = useState('')
@@ -168,23 +167,10 @@ export function InstitutionApp({
     </ActionSheet>
   )
 
-  const noticeSheet = showNotice && (
-    <ActionSheet title="平台公告" confirmLabel="我知道了" onClose={() => setShowNotice(false)} onConfirm={() => setShowNotice(false)}>
-      <h3 className="text-body font-semibold text-foreground">国庆后样本寄送时效调整说明</h3>
-      <p className="mt-1 text-caption text-muted-foreground">都正生物平台 · 10-15</p>
-      <div className="mt-3 flex flex-col gap-2 pb-2 text-note leading-6 text-foreground">
-        <p>各合作机构：</p>
-        <p>自 10 月 16 日起，实验室收样时间调整为每日 9:00 - 18:00，17:00 后预约的寄样将于次日揽收。</p>
-        <p>请在采样后 48 小时内完成寄样，样本需常温避光保存，避免挤压。如有疑问请联系平台客服。</p>
-      </div>
-    </ActionSheet>
-  )
-
   const shell = (content: React.ReactNode) => (
     <div className="relative flex h-full flex-col bg-background">
       {content}
       {callSheet}
-      {noticeSheet}
       {toastNode}
     </div>
   )
@@ -400,8 +386,7 @@ export function InstitutionApp({
               setTab('orders')
             } else if (key === 'activity') {
               const item = activities.find((a) => a.id === label)
-              if (item?.orderId) setOrderId(item.orderId)
-              else setShowNotice(true)
+              if (item) setOrderId(item.orderId)
             }
           }}
         />

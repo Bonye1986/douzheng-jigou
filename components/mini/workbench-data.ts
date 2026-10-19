@@ -6,7 +6,6 @@ export const instIcons = {
   arrived: '/images/icons/inst-arrived.png',
   report: '/images/icons/mine-report.png',
   sample: '/images/icons/mine-tosample.png',
-  notice: '/images/icons/inst-notice.png',
 } as const
 
 export type InstitutionProfile = {
@@ -54,7 +53,7 @@ export type ActivityItem = {
   time: string
   icon: string
   unread?: boolean
-  orderId?: string
+  orderId: string
 }
 
 export const activities: ActivityItem[] = [
@@ -99,12 +98,5 @@ export const activities: ActivityItem[] = [
     desc: '受检人 张** 的心血管用药基因检测报告已生成',
     time: '昨天 11:05',
     icon: instIcons.report,
-  },
-  {
-    id: 'a6',
-    title: '平台公告',
-    desc: '国庆后样本寄送时效调整说明，请合作机构留意',
-    time: '10-15',
-    icon: instIcons.notice,
   },
 ]
