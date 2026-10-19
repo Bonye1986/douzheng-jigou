@@ -149,7 +149,7 @@ export function LoginScreen({
               id={errorId}
               role="alert"
               className={cn(
-                'mt-2 flex min-h-5 items-start gap-1 pl-1 text-caption leading-5 text-destructive',
+                'mt-2 flex h-10 items-start gap-1 overflow-hidden pl-1 text-caption leading-5 text-destructive',
                 !error && 'invisible',
               )}
             >
@@ -157,10 +157,10 @@ export function LoginScreen({
               {error}
             </p>
 
-            <div className="mt-1 flex items-center justify-between">
-              <button
-                type="button"
-                role="checkbox"
+  <div className="flex items-center justify-between">
+  <button
+  type="button"
+  role="checkbox"
                 aria-checked={remember}
                 onClick={() => setRemember((value) => !value)}
                 className="flex items-center gap-2 py-1 text-note text-muted-foreground"
