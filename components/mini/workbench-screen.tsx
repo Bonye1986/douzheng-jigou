@@ -1,16 +1,14 @@
 'use client'
 
-import { BadgeCheck, Bell, Building2, ChevronRight, MapPin, Phone } from 'lucide-react'
+import { BadgeCheck, Building2, ChevronRight, MapPin, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { StatusBar, Capsule } from './phone-frame'
 import { activities, institution, quickActions, todayMetrics, type QuickActionKey } from './workbench-data'
 
 export function WorkbenchScreen({
   onAction,
-  unreadCount = activities.filter((item) => item.unread).length,
 }: {
-  onAction?: (key: QuickActionKey | 'activity' | 'notice' | 'profile', label: string) => void
-  unreadCount?: number
+  onAction?: (key: QuickActionKey | 'activity' | 'profile', label: string) => void
 }) {
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-background">
@@ -22,20 +20,7 @@ export function WorkbenchScreen({
         <StatusBar />
         <div className="flex h-11 items-center justify-between px-4">
           <h1 className="text-heading font-bold text-foreground">工作台</h1>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onAction?.('notice', '消息通知')}
-              aria-label={`消息通知，${unreadCount} 条未读`}
-              className="relative flex size-8 items-center justify-center rounded-full bg-white/80 text-foreground"
-            >
-              <Bell className="size-[18px]" aria-hidden="true" />
-              {unreadCount > 0 && (
-                <span className="absolute right-1 top-1 size-2 rounded-full bg-destructive ring-2 ring-white" />
-              )}
-            </button>
-            <Capsule />
-          </div>
+          <Capsule />
         </div>
       </div>
 
