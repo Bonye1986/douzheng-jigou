@@ -1,5 +1,6 @@
 import { DesignBoard, type BoardSection } from '@/components/design/design-board'
 import { BrandMark } from '@/components/mini/brand'
+import { InstitutionApp } from '@/components/mini/institution-app'
 import { DEMO_ACCOUNT, DEMO_PASSWORD, LoginScreen } from '@/components/mini/login-screen'
 
 const sections: BoardSection[] = [
@@ -59,6 +60,33 @@ const sections: BoardSection[] = [
             initialError="账号或密码错误，请重新输入（连续错误 5 次将锁定 30 分钟）"
           />
         ),
+      },
+    ],
+  },
+  {
+    key: 'workbench',
+    title: '工作台',
+    screens: [
+      {
+        id: '04',
+        title: '机构工作台',
+        desc: '机构登录后的首页，集中展示机构信息、今日业务数据、常用功能入口与最新业务动态。底部菜单分为「工作台」「数据统计」两项',
+        features: [
+          '机构信息：机构名称、认证状态、科室、机构编号、联系人与地址，点击可查看机构详情',
+          '今日数据：今日核销单数、今日采样例数、待寄样份数，每日 0 点重置',
+          '常用功能：订单核销、扫码采样、预约寄样、数据统计 4 个快捷入口',
+          '最新动态：按时间倒序展示核销、采样、寄样、样本到达、报告出具与平台公告，未读动态带红点',
+          '右上角消息铃铛，有未读消息时显示红点',
+          '底部菜单：工作台 / 数据统计，当前页高亮',
+        ],
+        interactions: [
+          '点击常用功能「订单核销」「扫码采样」「预约寄样」进入对应功能页（演示中以 Toast 提示）',
+          '点击「数据统计」快捷入口与底部菜单「数据统计」效果一致，切换至数据统计页',
+          '点击某条动态进入对应订单 / 样本 / 报告 / 公告详情，查看后红点消失',
+          '点击「全部」进入动态列表页，支持按类型筛选',
+          '页面内容超出一屏时上下滚动，顶部导航与底部菜单固定',
+        ],
+        node: <InstitutionApp />,
       },
     ],
   },
