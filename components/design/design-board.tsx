@@ -7,9 +7,11 @@ import { PhoneFrame } from '@/components/mini/phone-frame'
 export type BoardScreen = {
   id: string
   title: string
-  desc: string
-  features: string[]
-  interactions: string[]
+  summary: string
+  fields: string[]
+  flow: string[]
+  rules: string[]
+  exceptions: string[]
   node: ReactNode
 }
 export type BoardSection = { key: string; title: string; screens: BoardScreen[] }
@@ -101,14 +103,20 @@ export function DesignBoard({ sections, header }: { sections: BoardSection[]; he
             <h2 className="mt-0.5 text-pretty text-heading font-bold text-foreground">{activeScreen.title}</h2>
           </div>
           <div className="flex flex-col gap-6 px-5 py-5">
-            <NoteBlock title="页面概述">
-              <p className="text-pretty text-body leading-6 text-muted-foreground">{activeScreen.desc}</p>
+            <NoteBlock title="功能描述">
+              <p className="text-pretty text-body leading-6 text-muted-foreground">{activeScreen.summary}</p>
             </NoteBlock>
-            <NoteBlock title="功能说明">
-              <NoteList items={activeScreen.features} />
+            <NoteBlock title="页面字段">
+              <NoteList items={activeScreen.fields} />
             </NoteBlock>
-            <NoteBlock title="交互逻辑">
-              <NoteList items={activeScreen.interactions} numbered />
+            <NoteBlock title="操作流程">
+              <NoteList items={activeScreen.flow} numbered />
+            </NoteBlock>
+            <NoteBlock title="业务规则">
+              <NoteList items={activeScreen.rules} />
+            </NoteBlock>
+            <NoteBlock title="异常处理">
+              <NoteList items={activeScreen.exceptions} />
             </NoteBlock>
           </div>
         </aside>
