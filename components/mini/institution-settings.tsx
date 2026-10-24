@@ -1,7 +1,7 @@
 'use client'
 
 import { useId, useRef, useState, type ReactNode } from 'react'
-import { ChevronRight, CircleAlert, Eye, EyeOff, LockKeyhole } from 'lucide-react'
+import { Camera, ChevronRight, CircleAlert, Eye, EyeOff, LockKeyhole } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DEMO_PASSWORD } from './demo-credentials'
 import { NavBar, StatusBar } from './phone-frame'
@@ -138,6 +138,19 @@ function InfoForm({
         </p>
 
         <section aria-label="机构基本信息" className="divide-y divide-border rounded-2xl bg-white px-4 shadow-sm">
+          <AvatarRow
+            name={draft.name || profile.name}
+            logo={draft.logo}
+            onError={setError}
+            onChange={(logo) => {
+              const next = { ...saved, logo }
+              setDraft((current) => ({ ...current, logo }))
+              setSaved(next)
+              setError('')
+              onSave(next)
+            }}
+          />
+
           <Row label="机构名称" htmlFor={ids.name}>
             <input
               id={ids.name}
@@ -369,6 +382,65 @@ function PasswordRow({
         </button>
       </div>
     </Row>
+  )
+}
+
+const AVATAR_MAX_BYTES = 2 * 1024 * 1024
+const AVATAR_TYPES = ['image/png', 'image/jpeg', 'image/webp']
+
+function AvatarRow({
+  name,
+  logo,
+  onChange,
+  onError,
+}: {
+  name: string
+  logo?: string
+  onChange: (logo: string) => void
+  onError: (message: string) => void
+}) {
+  const id = useId()
+  const hintId = useId()
+
+  return (
+    <label htmlFor={id} className="flex min-h-[76px] cursor-pointer items-center gap-3 py-3">
+      <span className="w-[76px] shrink-0 text-body text-foreground">机构头像</span>
+      <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
+        <span id={hintId} className="text-caption text-faint">
+          {logo ? '点击更换' : '点击上传'}
+        </span>
+        <span className="relative size-12 shrink-0 overflow-hidden rounded-2xl border border-border bg-secondary">
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element -- local blob previews are not supported by next/image optimization
+            <img src={logo} alt={`${name}头像`} className="size-full object-cover" />
+          ) : (
+            <span className="flex size-full items-center justify-center text-title font-semibold text-primary">
+              {name.slice(0, 1)}
+            </span>
+          )}
+          <span className="absolute inset-x-0 bottom-0 flex h-4 items-center justify-center bg-[#2a3a52]/55 text-white">
+            <Camera className="size-3" aria-hidden="true" />
+          </span>
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-faint" aria-hidden="true" />
+      </span>
+      <input
+        id={id}
+        type="file"
+        accept={AVATAR_TYPES.join(',')}
+        aria-describedby={hintId}
+        className="sr-only"
+        onChange={(event) => {
+          const file = event.target.files?.[0]
+          event.target.value = ''
+          if (!file) return
+          if (!AVATAR_TYPES.includes(file.type)) return onError('头像仅支持 PNG、JPG、WEBP 格式')
+          if (file.size > AVATAR_MAX_BYTES) return onError('头像图片不能超过 2MB')
+          if (logo?.startsWith('blob:')) URL.revokeObjectURL(logo)
+          onChange(URL.createObjectURL(file))
+        }}
+      />
+    </label>
   )
 }
 
