@@ -50,19 +50,24 @@ export type ActivityItem = {
   id: string
   title: string
   desc: string
+  /** Operation time, `YYYY-MM-DD HH:mm`. */
   time: string
+  operator: string
   icon: string
   unread?: boolean
   orderId: string
 }
+
+export const WORKBENCH_ACTIVITY_LIMIT = 4
 
 export const activities: ActivityItem[] = [
   {
     id: 'a1',
     orderId: '3',
     title: '订单核销成功',
-    desc: '药物基因检测套餐 · 订单 DZ20261019088 · 受检人 李**',
-    time: '10 分钟前',
+    desc: '药物基因检测 · 精神类用药 · 受检人 王*',
+    time: '2026-10-19 09:45',
+    operator: '店员 李晓',
     icon: instIcons.verify,
     unread: true,
   },
@@ -70,8 +75,9 @@ export const activities: ActivityItem[] = [
     id: 'a2',
     orderId: '4',
     title: '样本已绑定',
-    desc: '样本编号 YB2610190231 已完成扫码采样，待寄送',
-    time: '32 分钟前',
+    desc: '样本编号 YW2610180088 已完成扫码采样，待寄样',
+    time: '2026-10-19 09:20',
+    operator: '店员 王芳',
     icon: instIcons.scan,
     unread: true,
   },
@@ -79,24 +85,63 @@ export const activities: ActivityItem[] = [
     id: 'a3',
     orderId: '5',
     title: '寄样已揽收',
-    desc: '顺丰 SF1402****8817 · 共 6 份样本，预计明日送达实验室',
-    time: '今天 09:12',
+    desc: '顺丰速运 SF1410180062 已上门揽收，预计明日送达实验室',
+    time: '2026-10-19 09:12',
+    operator: '店员 李晓',
     icon: instIcons.ship,
   },
   {
     id: 'a4',
     orderId: '6',
     title: '样本已到达实验室',
-    desc: '10 月 17 日寄出的 8 份样本已签收，进入检测流程',
-    time: '昨天 16:40',
+    desc: '受检人 赵* 的样本已签收，进入检测流程',
+    time: '2026-10-18 16:40',
+    operator: '都正检验实验室',
     icon: instIcons.arrived,
   },
   {
     id: 'a5',
+    orderId: '10',
+    title: '样本已绑定',
+    desc: '样本编号 YW2610180071 已完成扫码采样，待寄样',
+    time: '2026-10-18 15:08',
+    operator: '店员 王芳',
+    icon: instIcons.scan,
+  },
+  {
+    id: 'a6',
+    orderId: '7',
+    title: '样本开始检测',
+    desc: '受检人 周*琳 的样本质检合格，已上机检测',
+    time: '2026-10-18 11:30',
+    operator: '都正检验实验室',
+    icon: instIcons.arrived,
+  },
+  {
+    id: 'a7',
     orderId: '8',
     title: '检测报告已出具',
-    desc: '受检人 张** 的心血管用药基因检测报告已生成',
-    time: '昨天 11:05',
+    desc: '受检人 吴*强 的高血压个体化用药基因检测报告已生成',
+    time: '2026-10-18 11:05',
+    operator: '都正检验实验室',
     icon: instIcons.report,
   },
-]
+  {
+    id: 'a8',
+    orderId: '5',
+    title: '订单核销成功',
+    desc: '药物基因检测 · 心脑血管用药 · 受检人 陈*国',
+    time: '2026-10-18 11:36',
+    operator: '店员 李晓',
+    icon: instIcons.verify,
+  },
+  {
+    id: 'a9',
+    orderId: '6',
+    title: '寄样已揽收',
+    desc: '顺丰速运 SF1410170045 已上门揽收',
+    time: '2026-10-17 20:05',
+    operator: '店员 王芳',
+    icon: instIcons.ship,
+  },
+].sort((a, b) => b.time.localeCompare(a.time))

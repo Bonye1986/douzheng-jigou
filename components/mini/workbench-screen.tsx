@@ -4,9 +4,10 @@ import Image from 'next/image'
 import { ChevronRight, Clock, MapPin, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { StatusBar, Capsule } from './phone-frame'
+import { ActivityRows } from './activity-feed'
 import {
+  WORKBENCH_ACTIVITY_LIMIT,
   activities,
-  instIcons,
   institution,
   quickActions,
   todayMetrics,
@@ -17,10 +18,12 @@ import type { OrderStatus } from './orders-data'
 
 export function WorkbenchScreen({
   profile = institution,
+  readIds,
   onAction,
   onOpenOrders,
 }: {
   profile?: InstitutionProfile
+  readIds?: Set<string>
   onAction?: (key: QuickActionKey | 'activity' | 'feed' | 'profile', label: string) => void
   onOpenOrders?: (status: OrderStatus) => void
 }) {
@@ -71,42 +74,20 @@ export function WorkbenchScreen({
             <button
               type="button"
               onClick={() => onAction?.('feed', '全部动态')}
-              aria-label="最新动态：查看全部"
+              aria-label="最新动态：查看更多"
               className="-mr-1 flex items-center gap-0.5 px-1 py-0.5 text-caption text-muted-foreground"
             >
-              全部
+              更多
               <ChevronRight className="size-3.5" aria-hidden="true" />
             </button>
           </div>
-          <ul className="mt-2 divide-y divide-border">
-            {activities.map(({ id, title, desc, time, icon, unread }) => (
-              <li key={id}>
-                <button
-                  type="button"
-                  onClick={() => onAction?.('activity', id)}
-                  className="flex w-full gap-3 py-3 text-left"
-                >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(160deg,#f6f9ff_0%,#ebf2fc_100%)] ring-1 ring-inset ring-white">
-                    <Image src={icon} alt="" width={64} height={64} className="size-7 object-contain" />
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1.5 text-body font-medium text-foreground">
-                        {title}
-                        {unread && (
-                          <span className="size-1.5 rounded-full bg-destructive">
-                            <span className="sr-only">未读</span>
-                          </span>
-                        )}
-                      </span>
-                      <span className="shrink-0 text-caption text-faint">{time}</span>
-                    </span>
-                    <span className="line-clamp-2 text-caption text-muted-foreground">{desc}</span>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-1">
+            <ActivityRows
+              items={activities.slice(0, WORKBENCH_ACTIVITY_LIMIT)}
+              readIds={readIds}
+              onOpen={(item) => onAction?.('activity', item.id)}
+            />
+          </div>
         </section>
       </div>
     </div>
