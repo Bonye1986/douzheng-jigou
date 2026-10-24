@@ -1,7 +1,7 @@
 'use client'
 
 import { useId, useRef, useState, type ReactNode } from 'react'
-import { Camera, ChevronRight, CircleAlert, Eye, EyeOff, LockKeyhole } from 'lucide-react'
+import { Camera, ChevronRight, CircleAlert, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DEMO_PASSWORD } from './demo-credentials'
 import { NavBar, StatusBar } from './phone-frame'
@@ -133,10 +133,6 @@ function InfoForm({
       }}
     >
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-4 pt-3 [scrollbar-width:none] *:shrink-0">
-        <p className="px-1 text-caption text-muted-foreground">
-          {profile.type} · 机构编号 {profile.code}
-        </p>
-
         <section aria-label="机构基本信息" className="divide-y divide-border rounded-2xl bg-white px-4 shadow-sm">
           <AvatarRow
             name={draft.name || profile.name}
@@ -233,17 +229,31 @@ function InfoForm({
           {error}
         </p>
 
-        <h2 className="mt-3 px-1 text-caption font-medium text-muted-foreground">账号</h2>
-
-        <section aria-label="账号安全" className="-mt-1 rounded-2xl bg-white px-4 shadow-sm">
-          <button type="button" onClick={onOpenPassword} className="flex h-14 w-full items-center gap-3 text-left">
-            <span className="flex size-8 items-center justify-center rounded-xl bg-secondary text-primary">
-              <LockKeyhole className="size-4" aria-hidden="true" />
-            </span>
-            <span className="flex-1 text-body text-foreground">登录密码</span>
-            <span className="text-caption text-muted-foreground">修改</span>
-            <ChevronRight className="size-4 text-faint" aria-hidden="true" />
-          </button>
+        <section aria-labelledby={`${ids.error}-account`} className="mt-1 flex flex-col gap-2">
+          <h2 id={`${ids.error}-account`} className="px-1 text-caption font-medium text-muted-foreground">
+            账号与安全
+          </h2>
+          <div className="divide-y divide-border rounded-2xl bg-white px-4 shadow-sm">
+            <div className="flex min-h-14 items-center gap-3 py-3">
+              <span className="w-[76px] shrink-0 text-body text-foreground">机构类型</span>
+              <span className="flex-1 text-right text-body text-muted-foreground">{profile.type}</span>
+            </div>
+            <div className="flex min-h-14 items-center gap-3 py-3">
+              <span className="w-[76px] shrink-0 text-body text-foreground">机构编号</span>
+              <span className="flex-1 text-right font-mono text-body text-muted-foreground">{profile.code}</span>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenPassword}
+              className="flex min-h-14 w-full items-center gap-3 py-3 text-left active:opacity-70"
+            >
+              <span className="w-[76px] shrink-0 text-body text-foreground">登录密码</span>
+              <span className="flex flex-1 items-center justify-end gap-1 text-body text-muted-foreground">
+                修改
+                <ChevronRight className="size-4 text-faint" aria-hidden="true" />
+              </span>
+            </button>
+          </div>
         </section>
       </div>
 
