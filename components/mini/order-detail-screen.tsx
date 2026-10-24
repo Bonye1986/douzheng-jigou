@@ -11,6 +11,7 @@ import {
   getEventTime,
   getOrderEvents,
   getProgressIndex,
+  getSampler,
   getVerifier,
   orderStatuses,
   patientProfiles,
@@ -126,7 +127,6 @@ export function OrderDetailScreen({
                   copy={order.sampleCode ? () => onAction?.('样本编号已复制', order) : undefined}
                 />
                 <Row label="样本类型" value="口腔拭子" />
-                {sampled && <Row label="采样时间" value={getEventTime(order, '完成采样') ?? '-'} />}
                 {shipped && (
                   <>
                     <Row label="物流公司" value="顺丰速运" />
@@ -151,6 +151,12 @@ export function OrderDetailScreen({
                 <>
                   <Row label="核销时间" value={getEventTime(order, '订单核销') ?? '-'} />
                   <Row label="核销人员" value={getVerifier(order)} />
+                </>
+              )}
+              {sampled && (
+                <>
+                  <Row label="采样时间" value={getEventTime(order, '完成采样') ?? '-'} />
+                  <Row label="采样人员" value={getSampler(order)} />
                 </>
               )}
               {closed && <Row label="关闭原因" value="超时未支付" />}

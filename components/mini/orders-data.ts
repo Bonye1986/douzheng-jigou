@@ -52,6 +52,7 @@ export type Order = {
   sampleCode?: string
   verifyCode?: string
   verifier?: string
+  sampler?: string
   tracking?: string
   records?: Record<string, string>
 }
@@ -240,7 +241,7 @@ const eventTemplates: { title: string; offset: number; desc: (order: Order) => s
   { title: '用户下单', offset: 0, desc: () => '用户在药问基因小程序提交订单' },
   { title: '支付成功', offset: 3, desc: (o) => `微信支付 ¥${o.amount}` },
   { title: '订单核销', offset: 30, desc: (o) => `扫码核销成功，核销人：${getVerifier(o)}` },
-  { title: '完成采样', offset: 45, desc: (o) => `扫码绑定采样盒，样本编号 ${o.sampleCode ?? '-'}` },
+  { title: '完成采样', offset: 45, desc: (o) => `扫码绑定采样盒，样本编号 ${o.sampleCode ?? '-'}，采样人：${getSampler(o)}` },
   { title: '预约寄样', offset: 285, desc: (o) => `已预约顺丰速运上门取件，运单号 ${trackingNo(o)}` },
   { title: '实验室签收', offset: 1485, desc: () => '都正生物医学检验实验室已签收样本' },
   { title: '开始检测', offset: 1845, desc: () => '样本质检合格，已上机检测' },
@@ -253,6 +254,10 @@ export function trackingNo(order: Order) {
 
 export function getVerifier(order: Order) {
   return order.verifier ?? '店员 李晓'
+}
+
+export function getSampler(order: Order) {
+  return order.sampler ?? '店员 王芳'
 }
 
 function parseTime(time: string) {

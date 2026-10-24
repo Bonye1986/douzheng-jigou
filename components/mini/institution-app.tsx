@@ -23,7 +23,8 @@ import { ScanScreen } from './scan-screen'
 import { ShipBookingScreen } from './ship-booking-screen'
 import { historyOrders } from './stats-data'
 import { StatsScreen } from './stats-screen'
-import { activities, institution, type InstitutionProfile } from './workbench-data'
+import { ActivityListScreen } from './activity-feed'
+import { activities, institution, type ActivityItem, type InstitutionProfile } from './workbench-data'
 import { WorkbenchScreen } from './workbench-screen'
 
 const copiedLabels = ['订单号已复制', '样本编号已复制', '运单号已复制']
@@ -45,12 +46,14 @@ export function InstitutionApp({
   initialOrderStatus = 'all',
   initialOrderId,
   initialFlow,
+  initialShowActivities = false,
   onLogout,
 }: {
   initialTab?: InstitutionTabKey
   initialOrderStatus?: 'all' | OrderStatus
   initialOrderId?: string
   initialFlow?: InstitutionFlow
+  initialShowActivities?: boolean
   onLogout?: () => void
 }) {
   const [tab, setTab] = useState<InstitutionTabKey>(initialTab)
@@ -64,6 +67,8 @@ export function InstitutionApp({
   const [callOrder, setCallOrder] = useState<Order | undefined>()
   const [ordersKey, setOrdersKey] = useState(0)
   const [ordersStatus, setOrdersStatus] = useState<'all' | OrderStatus>(initialOrderStatus)
+  const [showActivities, setShowActivities] = useState(initialShowActivities)
+  const [readIds, setReadIds] = useState<Set<string>>(() => new Set())
   const [toast, setToast] = useState('')
   const toastTimer = useRef<number | undefined>(undefined)
 
@@ -92,6 +97,11 @@ export function InstitutionApp({
     else if (label === '查看报告' && order) setFlow({ type: 'report', orderId: order.id })
     else return false
     return true
+  }
+
+  const openActivity = (item: ActivityItem) => {
+    setReadIds((prev) => new Set(prev).add(item.id))
+    setOrderId(item.orderId)
   }
 
   const handleOrderAction = (label: string, order?: Order) => {
@@ -123,7 +133,7 @@ export function InstitutionApp({
 
   const confirmSample = (code: string, id: string) => {
     const time = nowText()
-    updateOrders([id], (o) => ({ status: 'toShip', sampleCode: code, records: { ...o.records, 完成采样: time } }))
+    updateOrders([id], (o) => ({ status: 'toShip', sampleCode: code, sampler: CURRENT_STAFF, records: { ...o.records, 完成采样: time } }))
     setPending(undefined)
     setPickedOrderId(undefined)
     setFlow(undefined)
@@ -353,6 +363,17 @@ export function InstitutionApp({
     )
   }
 
+  if (showActivities) {
+    return shell(
+      <ActivityListScreen
+        items={activities}
+        readIds={readIds}
+        onBack={() => setShowActivities(false)}
+        onOpen={openActivity}
+      />,
+    )
+  }
+
   if (showSettings) {
     return shell(
       <InstitutionSettingsScreen
@@ -369,6 +390,7 @@ export function InstitutionApp({
       {tab === 'workbench' ? (
         <WorkbenchScreen
           profile={profile}
+          readIds={readIds}
           onOpenOrders={(status) => {
             setOrdersStatus(status)
             setOrdersKey((k) => k + 1)
@@ -380,13 +402,10 @@ export function InstitutionApp({
             else if (key === 'verify') setFlow({ type: 'verify' })
             else if (key === 'scan') setFlow({ type: 'sample' })
             else if (key === 'ship') setFlow({ type: 'ship' })
-            else if (key === 'feed') {
-              setOrdersStatus('all')
-              setOrdersKey((k) => k + 1)
-              setTab('orders')
-            } else if (key === 'activity') {
+            else if (key === 'feed') setShowActivities(true)
+            else if (key === 'activity') {
               const item = activities.find((a) => a.id === label)
-              if (item) setOrderId(item.orderId)
+              if (item) openActivity(item)
             }
           }}
         />
