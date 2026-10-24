@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import Image from 'next/image'
-import { Check, Copy } from 'lucide-react'
+import { Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
 import { getProductImage } from './orders-data'
@@ -15,7 +15,6 @@ import {
   getVerifier,
   orderStatuses,
   patientProfiles,
-  progressSteps,
   statusActions,
   trackingNo,
   type Order,
@@ -78,8 +77,6 @@ export function OrderDetailScreen({
         </section>
 
         <div className="relative z-10 -mt-8 flex flex-col gap-3 px-4 pb-4">
-          {!closed && <ProgressCard progress={progress} done={order.status === 'done'} />}
-
           <Card title="检测项目">
             <div className="flex items-center gap-3">
               <Image
@@ -231,77 +228,6 @@ export function OrderDetailScreen({
         </footer>
       )}
     </div>
-  )
-}
-
-function ProgressCard({ progress, done }: { progress: number; done: boolean }) {
-  const total = progressSteps.length
-  const completedCount = done ? total : progress
-  return (
-    <section aria-label="服务进度" className="rounded-2xl bg-white px-4 pb-4 pt-3.5 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-body font-semibold text-foreground">服务进度</h3>
-        <span className="text-caption text-muted-foreground">
-          {done ? (
-            <span className="inline-flex items-center gap-1 font-medium text-primary">
-              <Check className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
-              全部完成
-            </span>
-          ) : (
-            <>
-              当前 <span className="font-semibold text-primary">{progressSteps[progress]}</span>
-              <span className="mx-1.5 text-faint">·</span>
-              {completedCount}/{total}
-            </>
-          )}
-        </span>
-      </div>
-      <ol className="flex">
-        {progressSteps.map((step, index) => {
-          const finished = done || index < progress
-          const current = !done && index === progress
-          return (
-            <li key={step} className="relative flex flex-1 flex-col items-center gap-2">
-              {index > 0 && (
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    'absolute right-1/2 top-[7px] z-0 h-[2px] w-full rounded-full',
-                    finished || current ? 'bg-primary' : 'bg-border',
-                  )}
-                />
-              )}
-              <span aria-hidden="true" className="relative z-10 flex size-4 items-center justify-center">
-                {current && <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />}
-                {finished ? (
-                  <span
-                    className="relative flex size-4 items-center justify-center rounded-full bg-primary text-white"
-                  >
-                    <Check className="size-2.5" strokeWidth={3.5} />
-                  </span>
-                ) : (
-                  <span
-                    className={cn(
-                      'relative rounded-full',
-                      current ? 'size-3 bg-primary ring-[3px] ring-primary/25' : 'size-2 bg-border',
-                    )}
-                  />
-                )}
-              </span>
-              <span
-                className={cn(
-                  'text-[11px] leading-none',
-                  current ? 'font-semibold text-primary' : finished ? 'text-muted-foreground' : 'text-faint',
-                )}
-              >
-                {step}
-                <span className="sr-only">{finished ? '（已完成）' : current ? '（进行中）' : '（未开始）'}</span>
-              </span>
-            </li>
-          )
-        })}
-      </ol>
-    </section>
   )
 }
 
