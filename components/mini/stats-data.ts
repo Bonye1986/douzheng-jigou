@@ -103,19 +103,29 @@ function mulberry32(seed: number) {
   }
 }
 
-function pickStatus(daysAgo: number, r: number): OrderStatus {
-  if (r < 0.08) return 'closed'
-  if (daysAgo > 12) return 'done'
-  if (daysAgo > 8) return r < 0.6 ? 'done' : 'testing'
-  if (daysAgo > 4) return r < 0.4 ? 'testing' : r < 0.75 ? 'toTest' : 'toReceive'
-  return r < 0.4 ? 'toReceive' : r < 0.7 ? 'toShip' : 'toSample'
+/** History orders are already finished, so in-progress tabs only contain the curated seed orders. */
+function pickStatus(r: number): OrderStatus {
+  return r < 0.08 ? 'closed' : 'done'
 }
 
-/** Deterministic historical orders so period stats have realistic volume. */
+/** Seed orders cover the last 11 days; history starts before that so the two never overlap. */
+const HISTORY_NEWEST_DAYS_AGO = 12
+
+const historySources: Pick<Order, 'mode' | 'institutionCode'>[] = [
+  { mode: 'onsite', institutionCode: 'JG-430102-0018' },
+  { mode: 'onsite', institutionCode: 'JG-430102-0018' },
+  { mode: 'onsite', institutionCode: 'JG-430104-0032' },
+  { mode: 'self' },
+]
+
+/**
+ * Deterministic historical orders, merged into the order list so the order tabs and the
+ * stats page always count the same dataset.
+ */
 function generateHistory(): Order[] {
   const rand = mulberry32(20261019)
   const list: Order[] = []
-  for (let daysAgo = 90; daysAgo >= 1; daysAgo--) {
+  for (let daysAgo = 90; daysAgo >= HISTORY_NEWEST_DAYS_AGO; daysAgo--) {
     const day = new Date(STATS_TODAY.getTime() - daysAgo * DAY)
     const weekend = day.getDay() === 0 || day.getDay() === 6
     const count = Math.floor(rand() * (weekend ? 6 : 4)) + (daysAgo < 30 ? 1 : 0)
@@ -123,16 +133,18 @@ function generateHistory(): Order[] {
       const p = products[Math.floor(rand() * products.length)]
       const hour = 8 + Math.floor(rand() * 11)
       const minute = Math.floor(rand() * 60)
-      const status = pickStatus(daysAgo, rand())
+      const status = pickStatus(rand())
+      const source = historySources[Math.floor(rand() * historySources.length)]
       const md = `${pad(day.getMonth() + 1)}-${pad(day.getDate())}`
       const no = `DZ2026${md.replace('-', '')}${pad(50 + i)}${Math.floor(rand() * 10)}`.slice(0, 14)
       const surname = surnames[Math.floor(rand() * surnames.length)]
       const given = rand() < 0.5 ? givenNames[Math.floor(rand() * givenNames.length)] : ''
       const prefix = prefixes[Math.floor(rand() * prefixes.length)]
       const tail = String(Math.floor(rand() * 10000)).padStart(4, '0')
-      const hasSample = !['closed', 'toSample'].includes(status)
+      const hasSample = status === 'done'
       list.push({
         id: `h${list.length + 1}`,
+        ...source,
         no,
         status,
         product: p.product,

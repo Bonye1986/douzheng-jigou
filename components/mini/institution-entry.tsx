@@ -3,20 +3,23 @@
 import { useState, type ComponentProps } from 'react'
 import { InstitutionApp } from './institution-app'
 import { LoginScreen } from './login-screen'
+import type { InstitutionRole } from './orders-data'
 
 export function InstitutionEntry(props: Omit<ComponentProps<typeof LoginScreen>, 'onLogin'>) {
-  const [loggedIn, setLoggedIn] = useState(false)
+  const [role, setRole] = useState<InstitutionRole | undefined>()
   const [session, setSession] = useState(0)
 
-  if (loggedIn) {
+  if (role) {
     return (
       <InstitutionApp
+        key={role}
+        role={role}
         onLogout={() => {
-          setLoggedIn(false)
+          setRole(undefined)
           setSession((s) => s + 1)
         }}
       />
     )
   }
-  return <LoginScreen key={session} {...props} onLogin={() => setLoggedIn(true)} />
+  return <LoginScreen key={session} {...props} onLogin={setRole} />
 }

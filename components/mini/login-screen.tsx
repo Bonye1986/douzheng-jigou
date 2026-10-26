@@ -7,7 +7,8 @@ import { cn } from '@/lib/utils'
 import { BrandLogo } from './brand'
 import { NavBar, StatusBar } from './phone-frame'
 
-import { DEMO_ACCOUNT, DEMO_PASSWORD } from './demo-credentials'
+import { demoAccounts } from './demo-credentials'
+import type { InstitutionRole } from './orders-data'
 
 type Status = 'idle' | 'loading' | 'success'
 
@@ -22,7 +23,7 @@ export function LoginScreen({
   initialPassword?: string
   initialRemember?: boolean
   initialError?: string
-  onLogin?: () => void
+  onLogin?: (role: InstitutionRole) => void
 }) {
   const accountId = useId()
   const passwordId = useId()
@@ -42,9 +43,10 @@ export function LoginScreen({
     setError('')
     setStatus('loading')
     window.setTimeout(() => {
-      if (account.trim() === DEMO_ACCOUNT && password === DEMO_PASSWORD) {
+      const matched = demoAccounts.find((a) => a.account === account.trim() && a.password === password)
+      if (matched) {
         setStatus('success')
-        window.setTimeout(() => (onLogin ? onLogin() : setStatus('idle')), onLogin ? 1000 : 1800)
+        window.setTimeout(() => (onLogin ? onLogin(matched.role) : setStatus('idle')), onLogin ? 1000 : 1800)
         return
       }
       setStatus('idle')
@@ -74,10 +76,10 @@ export function LoginScreen({
             <h1 className="text-display font-bold leading-[1.3]">机构端登录</h1>
             <span className="flex items-center gap-1 rounded-full border border-primary/10 bg-white/80 px-2.5 py-1 text-caption text-secondary-foreground backdrop-blur">
               <Building2 className="size-3.5 text-accent" aria-hidden="true" />
-              合作机构专用
+              实验室 / 合作机构
             </span>
           </div>
-          <p className="mt-2 text-body leading-6 text-muted-foreground">请使用平台分配的机构账号登录</p>
+          <p className="mt-2 text-body leading-6 text-muted-foreground">请使用平台分配的账号登录，系统将自动识别实验室或合作机构身份</p>
 
           <form onSubmit={handleSubmit} noValidate className="mt-7 flex flex-col">
             <div className="flex flex-col gap-3">

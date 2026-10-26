@@ -1,9 +1,9 @@
 import { DesignBoard, type BoardSection } from '@/components/design/design-board'
-import { orderDetailScreens, orderFlowScreens, orderListScreens } from '@/components/design/order-screens'
+import { labOrderScreens, orderDetailScreens, orderFlowScreens, orderListScreens } from '@/components/design/order-screens'
 import { BrandMark } from '@/components/mini/brand'
 import { InstitutionApp } from '@/components/mini/institution-app'
 import { InstitutionSettingsScreen } from '@/components/mini/institution-settings'
-import { DEMO_ACCOUNT, DEMO_PASSWORD } from '@/components/mini/demo-credentials'
+import { DEMO_ACCOUNT, DEMO_PASSWORD, LAB_ACCOUNT, LAB_PASSWORD } from '@/components/mini/demo-credentials'
 import { InstitutionEntry } from '@/components/mini/institution-entry'
 import { LoginScreen } from '@/components/mini/login-screen'
 
@@ -15,9 +15,9 @@ const sections: BoardSection[] = [
       {
         id: '01',
         title: '机构登录页',
-        summary: '机构端唯一入口，使用平台分配的机构账号与密码登录。账号由都正生物平台统一开通，不支持自主注册',
+        summary: '机构端唯一入口，实验室与合作机构共用。使用平台分配的账号与密码登录，系统根据账号类型自动进入对应身份的工作台。账号由都正生物平台统一开通，不支持自主注册',
         fields: [
-          '品牌区：平台 Logo、「机构端登录 · 合作机构专用」标识',
+          '品牌区：平台 Logo、「机构端登录 · 实验室 / 合作机构」标识',
           '登录账号：文本输入，最多 32 位，有内容时右侧显示清空按钮',
           '登录密码：默认密文，可点击眼睛图标切换明文 / 密文',
           '记住密码：复选框，默认不勾选',
@@ -27,13 +27,17 @@ const sections: BoardSection[] = [
           '输入登录账号与密码',
           '按需勾选「记住密码」',
           '点击「登录」，按钮进入加载态',
-          '校验通过后 Toast 提示「登录成功」，进入机构工作台',
+          '校验通过后 Toast 提示「登录成功」，按账号类型进入实验室工作台或合作机构工作台',
         ],
         rules: [
+          '账号类型（实验室 / 合作机构）由平台开通账号时设定，登录页不提供身份选择',
+          '实验室：可查看平台全部自采样订单与所有机构的定点采样订单，可扫码检测、发起重采样',
+          '合作机构：仅可查看本机构的定点采样订单，可核销、采样、寄样',
           '账号与密码均填写后「登录」按钮才可点击，否则置灰',
           '勾选记住密码并登录成功后，下次进入自动回填账号与密码',
           '忘记密码不提供自助找回，引导联系平台管理员重置',
-          `演示账号 ${DEMO_ACCOUNT} / 密码 ${DEMO_PASSWORD}`,
+          `演示合作机构账号 ${DEMO_ACCOUNT} / 密码 ${DEMO_PASSWORD}`,
+          `演示实验室账号 ${LAB_ACCOUNT} / 密码 ${LAB_PASSWORD}`,
         ],
         exceptions: [
           '账号或密码错误：输入框标红并提示原因，不区分「账号不存在」与「密码错误」',
@@ -83,25 +87,25 @@ const sections: BoardSection[] = [
     screens: [
       {
         id: '04',
-        title: '机构工作台',
-        summary: '机构登录后的首页，集中展示机构信息、今日业务数据、常用功能入口与最新业务动态',
+        title: '合作机构工作台',
+        summary: '合作机构账号登录后的首页，集中展示机构信息、待办数据、常用功能入口与本机构最新业务动态',
         fields: [
-          '机构信息卡：机构名称、机构类型（诊所 / 药店）、机构编号、工作时间、联系电话、地址',
-          '今日数据：今日核销（单）、今日采样（例）、待寄样（份）',
+          '机构信息卡：机构名称、机构类型（合作机构 · 诊所 / 药店）、机构编号、工作时间、联系电话、地址',
+          '待办数据：待核销（单）、待采样（例）、待寄样（份）',
           '常用功能：订单核销、扫码采样、预约寄样、数据统计',
           '最新动态：核销、采样、寄样、样本到达、报告出具，含标题、内容、操作人、操作时间与未读红点；右上角「更多」',
           '底部菜单：工作台 / 订单管理 / 数据统计',
         ],
         flow: [
           '点击机构信息卡进入机构设置',
-          '点击今日数据跳转至订单列表并选中对应状态（待核销 / 待采样 / 待寄样）',
+          '点击待办数据跳转至订单列表并选中对应状态（待核销 / 待采样 / 待寄样）',
           '点击常用功能进入扫码核销、扫码采样、预约寄样或数据统计',
           '点击某条动态进入对应订单详情，红点消失',
           '点击「更多」进入动态列表查看全部动态记录',
           '点击底部菜单切换页面',
         ],
         rules: [
-          '今日数据每日 0 点重置，待寄样为实时数量',
+          '待办数据为实时数量，与订单列表对应状态的订单数一致，订单状态变化后同步更新',
           '动态按时间倒序展示，工作台仅展示最新 4 条，仅展示本机构相关业务',
           '操作人为执行该操作的机构店员；样本到达、检测、报告类动态的操作人为实验室',
           '顶部导航与底部菜单固定，内容区可滚动',
@@ -112,6 +116,31 @@ const sections: BoardSection[] = [
           '登录状态失效：提示「登录已过期」并返回登录页',
         ],
         node: <InstitutionApp />,
+      },
+      {
+        id: '04-2',
+        title: '实验室工作台',
+        summary: '实验室账号登录后的首页，聚焦样本检测：展示待收样 / 待检测 / 检测中数量、检测相关功能入口与全平台检测动态',
+        fields: [
+          '机构信息卡：实验室名称、「实验室」类型标签、编号、收样时间、联系电话、地址',
+          '待办数据：待收样（份）、待检测（份）、检测中（份），为全平台实时数量，与订单列表对应状态订单数一致',
+          '常用功能：扫码检测、待检测、检测报告、数据统计',
+          '最新动态：样本签收、开始检测、发起重采样、客户同意重采样 / 申请退款、报告出具，内容含采样来源（自采样或机构名称）',
+          '底部菜单：工作台 / 订单管理 / 数据统计',
+        ],
+        flow: [
+          '点击「扫码检测」进入扫码检测页，按样本编码匹配全平台待检测订单',
+          '点击「待检测」「检测报告」进入订单列表并选中「待检测」「已完成」',
+          '点击待办数据跳转订单列表对应状态',
+          '点击某条动态进入对应订单详情',
+        ],
+        rules: [
+          '待检测、检测中为实时数量，统计范围为全部自采样与定点采样订单',
+          '实验室不参与机构端采样工作，不展示核销、采样、寄样入口',
+          '动态按时间倒序展示，工作台仅展示最新 4 条',
+        ],
+        exceptions: ['暂无动态：展示空状态「暂无业务动态」', '登录状态失效：提示「登录已过期」并返回登录页'],
+        node: <InstitutionApp role="lab" />,
       },
       {
         id: '04-1',
@@ -146,6 +175,11 @@ const sections: BoardSection[] = [
     screens: orderFlowScreens,
   },
   {
+    key: 'lab',
+    title: '实验室检测',
+    screens: labOrderScreens,
+  },
+  {
     key: 'stats',
     title: '数据统计',
     screens: [
@@ -157,7 +191,7 @@ const sections: BoardSection[] = [
           '时间段：今日 / 近7天 / 近30天 / 本月 / 自定义（开始日期、结束日期），下方显示日期范围与天数',
           '状态筛选：全部 / 待付款 / 待核销 / 待采样 / 待寄样 / 检测中 / 已完成 / 已关闭',
           '核心指标：成交金额（元）、订单数、客单价、已出报告',
-          '订单趋势：柱状图，可切换订单量 / 金额，显示合计或选中时段数值',
+          '订单趋势：柱状图，可切换订单量 / 金额，显示合计或选��时段数值',
           '状态分布：各状态订单数、占比与进度条',
           '检测项目排行：前 5 名项目的订单数与金额',
           '订单明细：受检人、状态、检测项目、订单号、下单时间、金额',
@@ -200,7 +234,7 @@ const sections: BoardSection[] = [
           '工作时间：开始时间、结束时间',
           '联系电话：必填，手机号或座机号',
           '机构地址：必填，最多 60 字，两行展示',
-          '账号与安全卡：机构类型、机构编号（只读，由平台分配）、登录密码（点击进入修改密码页）',
+          '账号与安全卡：机构类型（实验室 / 合作机构 · 诊所 / 药店）、机构编号（只读，由平台分配）、登录密码（点击进入修改密码页）',
           '退出登录：固定在页面底部',
         ],
         flow: [
@@ -276,7 +310,7 @@ export default function Page() {
               </div>
               <div>
                 <dt>登录方式</dt>
-                <dd className="font-medium text-foreground">机构账号 + 密码</dd>
+                <dd className="font-medium text-foreground">实验室 / 合作机构账号 + 密码</dd>
               </div>
               <div>
                 <dt>页面数</dt>

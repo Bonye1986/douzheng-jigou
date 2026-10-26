@@ -7,16 +7,21 @@ import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
 import { getProductImage } from './orders-data'
 import {
+  getCloseReason,
   getCloseTime,
   getEventTime,
+  getOrderActions,
   getOrderEvents,
+  getPatientProfile,
   getProgressIndex,
   getSampler,
+  getSourceLabel,
+  getTester,
   getVerifier,
   orderStatuses,
-  patientProfiles,
-  statusActions,
+  sampleModeLabel,
   trackingNo,
+  type InstitutionRole,
   type Order,
 } from './orders-data'
 
@@ -24,21 +29,28 @@ const statusMap = Object.fromEntries(orderStatuses.map((s) => [s.key, s]))
 
 export function OrderDetailScreen({
   order,
+  role = 'partner',
   onBack,
   onAction,
 }: {
   order: Order
+  role?: InstitutionRole
   onBack?: () => void
   onAction?: (label: string, order: Order) => void
 }) {
   const status = statusMap[order.status]
   const closed = order.status === 'closed'
-  const actions = statusActions[order.status]
+  const actions = getOrderActions(order, role)
   const progress = getProgressIndex(order.status)
-  const profile = patientProfiles[order.id]
+  const profile = getPatientProfile(order)
   const events = getOrderEvents(order)
-  const sampled = !closed && progress >= 3
+  const onsite = order.mode === 'onsite'
+  const sampled = !closed && progress >= 3 && onsite
   const shipped = !closed && progress >= 4
+  const tested = !closed && progress >= 5 && order.status !== 'toTest'
+  const resample = order.resample
+  const statusHint =
+    resample?.state === 'pending' ? '已发起重采样，等待客户确认是否重新采样' : status.hint
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
@@ -72,11 +84,12 @@ export function OrderDetailScreen({
           />
           <h2 className="relative text-headline font-bold tracking-tight">{status.label}</h2>
           <p className="relative mt-1 text-note text-white/85">
-            {closed ? `关闭时间 ${getCloseTime(order)}` : status.hint}
+            {closed ? `关闭时间 ${getCloseTime(order)}` : statusHint}
           </p>
         </section>
 
         <div className="relative z-10 -mt-8 flex flex-col gap-3 px-4 pb-4">
+          {resample && <ResampleCard order={order} role={role} onAction={onAction} />}
           <Card title="检测项目">
             <div className="flex items-center gap-3">
               <Image
@@ -89,7 +102,7 @@ export function OrderDetailScreen({
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <p className="truncate text-body font-medium text-foreground">{order.product}</p>
                 <p className="truncate text-caption text-faint">{order.spec}</p>
-                <p className="text-caption text-muted-foreground">口腔拭子采样</p>
+                <p className="text-caption text-muted-foreground">口腔拭子 · {sampleModeLabel[order.mode]}</p>
               </div>
             </div>
             <dl className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
@@ -137,6 +150,8 @@ export function OrderDetailScreen({
           <Card title="订单信息">
             <dl className="flex flex-col gap-2">
               <Row label="订单编号" value={order.no} copy={() => onAction?.('订单号已复制', order)} />
+              <Row label="采样方式" value={sampleModeLabel[order.mode]} />
+              {role === 'lab' && onsite && <Row label="采样机构" value={getSourceLabel(order)} />}
               <Row label="下单时间" value={getEventTime(order, '用户下单') ?? `2026-${order.time}`} />
               {!closed && order.status !== 'unpaid' && (
                 <>
@@ -156,7 +171,13 @@ export function OrderDetailScreen({
                   <Row label="采样人员" value={getSampler(order)} />
                 </>
               )}
-              {closed && <Row label="关闭原因" value="超时未支付" />}
+              {tested && (
+                <>
+                  <Row label="检测时间" value={getEventTime(order, '开始检测') ?? '-'} />
+                  <Row label="检测人员" value={getTester(order)} />
+                </>
+              )}
+              {closed && <Row label="关闭原因" value={getCloseReason(order)} />}
             </dl>
           </Card>
 
@@ -206,9 +227,11 @@ export function OrderDetailScreen({
           {actions.map((action) => {
             const className = cn(
               'flex h-10 items-center justify-center rounded-full px-5 text-body font-medium transition-transform active:scale-95',
-              action.primary
-                ? 'min-w-28 bg-brand text-white shadow-brand'
-                : 'border border-[#dfe6f0] bg-white text-foreground',
+              action.disabled
+                ? 'min-w-28 cursor-not-allowed bg-muted text-faint active:scale-100'
+                : action.primary
+                  ? 'min-w-28 bg-brand text-white shadow-brand'
+                  : 'border border-[#dfe6f0] bg-white text-foreground',
             )
             return action.tel ? (
               <a
@@ -220,7 +243,13 @@ export function OrderDetailScreen({
                 {action.label}
               </a>
             ) : (
-              <button key={action.label} type="button" onClick={() => onAction?.(action.label, order)} className={className}>
+              <button
+                key={action.label}
+                type="button"
+                disabled={action.disabled}
+                onClick={() => onAction?.(action.label, order)}
+                className={className}
+              >
                 {action.label}
               </button>
             )
@@ -228,6 +257,63 @@ export function OrderDetailScreen({
         </footer>
       )}
     </div>
+  )
+}
+
+const resampleCopy = {
+  pending: { title: '重采样 · 待客户确认', tone: 'bg-warning-soft text-warning' },
+  agreed: { title: '客户已同意重采样', tone: 'bg-secondary text-primary' },
+  refunded: { title: '客户已选择退款', tone: 'bg-muted text-muted-foreground' },
+} as const
+
+function ResampleCard({
+  order,
+  role,
+  onAction,
+}: {
+  order: Order
+  role: InstitutionRole
+  onAction?: (label: string, order: Order) => void
+}) {
+  const r = order.resample
+  if (!r) return null
+  const copy = resampleCopy[r.state]
+  const next =
+    r.state === 'pending'
+      ? '客户同意后订单回到' + (order.mode === 'self' ? '「待收货」，平台重新寄出采样盒' : '「待采样」，客户到店重新采样') + '；客户不同意则全额退款并关闭订单'
+      : r.state === 'agreed'
+        ? order.mode === 'self'
+          ? '平台已重新寄出采样盒，等待客户采样后寄回实验室'
+          : role === 'partner'
+            ? '客户将到店重新采样，请扫描新的采样盒完成绑定'
+            : '客户将到合作机构重新采样，订单已回到待采样'
+        : '客户不同意重新采样，订单已全额原路退款并关闭'
+  return (
+    <section aria-label="重采样" className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-body font-semibold text-foreground">重采样</h3>
+        <span className={cn('rounded-full px-2 py-0.5 text-caption font-medium', copy.tone)}>{copy.title}</span>
+      </div>
+      <dl className="mt-3 flex flex-col gap-2">
+        <Row label="重采样原因" value={r.reason} />
+        <Row label="发起时间" value={r.at} />
+        <Row label="发起人" value={r.operator} />
+        {r.decidedAt && <Row label="客户确认时间" value={r.decidedAt} />}
+        {r.snapshot.sampleCode && <Row label="原样本编号" value={r.snapshot.sampleCode} />}
+      </dl>
+      <p className="mt-3 rounded-xl bg-[#f5f8fd] px-3 py-2 text-caption leading-5 text-muted-foreground">{next}</p>
+      {r.state === 'pending' && role === 'lab' && (
+        <div className="mt-2 flex items-center justify-end gap-4 text-caption">
+          <span className="mr-auto text-faint">演示：模拟客户选择</span>
+          <button type="button" onClick={() => onAction?.('客户同意重采样', order)} className="text-primary">
+            同意重采样
+          </button>
+          <button type="button" onClick={() => onAction?.('客户申请退款', order)} className="text-muted-foreground">
+            申请退款
+          </button>
+        </div>
+      )}
+    </section>
   )
 }
 
