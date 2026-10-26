@@ -6,15 +6,24 @@ import { ChevronRight, Copy, Search, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
 import {
+  getOrderActions,
   getProductImage,
+  getSourceLabel,
   orderStatuses,
-  statusActions,
+  type InstitutionRole,
   type Order,
   type OrderStatus,
   type StatusTone,
 } from './orders-data'
 
 type FilterKey = 'all' | OrderStatus
+type SourceKey = 'all' | 'self' | 'onsite'
+
+const sourceTabs: { key: SourceKey; label: string }[] = [
+  { key: 'all', label: '全部来源' },
+  { key: 'self', label: '自采样' },
+  { key: 'onsite', label: '定点采样' },
+]
 
 const toneClass: Record<StatusTone, string> = {
   warning: 'bg-warning-soft text-warning',
@@ -29,16 +38,25 @@ const statusMap = Object.fromEntries(orderStatuses.map((s) => [s.key, s])) as Re
 >
 
 export function OrdersScreen({
-  orders,
+  orders: allOrders,
+  role = 'partner',
   initialStatus = 'all',
   onAction,
 }: {
   orders: Order[]
+  role?: InstitutionRole
   initialStatus?: FilterKey
   onAction?: (label: string, order?: Order) => void
 }) {
   const [filter, setFilter] = useState<FilterKey>(initialStatus)
+  const [source, setSource] = useState<SourceKey>('all')
   const [keyword, setKeyword] = useState('')
+  const isLab = role === 'lab'
+
+  const orders = useMemo(
+    () => (source === 'all' ? allOrders : allOrders.filter((o) => o.mode === source)),
+    [allOrders, source],
+  )
 
   const counts = useMemo(() => {
     const map: Partial<Record<FilterKey, number>> = { all: orders.length }
@@ -51,7 +69,7 @@ export function OrdersScreen({
     return orders.filter((order) => {
       if (filter !== 'all' && order.status !== filter) return false
       if (!q) return true
-      return [order.no, order.patient, order.phone, order.product].some((v) => v.toLowerCase().includes(q))
+      return [order.no, order.patient, order.phone, order.product, order.sampleCode ?? '', getSourceLabel(order)].some((v) => v.toLowerCase().includes(q))
     })
   }, [orders, filter, keyword])
 
@@ -70,7 +88,7 @@ export function OrdersScreen({
               type="search"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="搜索订单号 / 用户姓名 / 手机号"
+              placeholder={isLab ? '搜索订单号 / 样本编码 / 姓名 / 机构' : '搜索订单号 / 用户姓名 / 手机号'}
               className="min-w-0 flex-1 bg-transparent text-note text-foreground outline-none placeholder:text-faint [&::-webkit-search-cancel-button]:hidden"
             />
             {keyword && (
@@ -85,6 +103,28 @@ export function OrdersScreen({
             )}
           </label>
         </div>
+        {isLab && (
+          <div role="radiogroup" aria-label="采样方式" className="flex gap-2 px-4 pb-2">
+            {sourceTabs.map((tab) => {
+              const active = source === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => setSource(tab.key)}
+                  className={cn(
+                    'h-7 rounded-full px-3 text-caption font-medium transition-colors',
+                    active ? 'bg-primary text-primary-foreground' : 'bg-[#f4f7fb] text-muted-foreground',
+                  )}
+                >
+                  {tab.label}
+                </button>
+              )
+            })}
+          </div>
+        )}
         <div
           role="tablist"
           aria-label="订单状态"
@@ -147,7 +187,7 @@ export function OrdersScreen({
           <ul className="flex flex-col gap-3">
             {list.map((order) => (
               <li key={order.id}>
-                <OrderCard order={order} onAction={onAction} />
+                <OrderCard order={order} role={role} onAction={onAction} />
               </li>
             ))}
           </ul>
@@ -158,9 +198,19 @@ export function OrdersScreen({
   )
 }
 
-function OrderCard({ order, onAction }: { order: Order; onAction?: (label: string, order?: Order) => void }) {
+function OrderCard({
+  order,
+  role,
+  onAction,
+}: {
+  order: Order
+  role: InstitutionRole
+  onAction?: (label: string, order?: Order) => void
+}) {
   const status = statusMap[order.status]
-  const actions = statusActions[order.status]
+  const actions = getOrderActions(order, role)
+  const resampleTag =
+    order.resample?.state === 'pending' ? '重采样待确认' : order.resample?.state === 'agreed' && order.status === resampleTagStatus(order) ? '重采样' : undefined
   const closed = order.status === 'closed'
 
   return (
@@ -178,8 +228,13 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
             <Copy className="size-3" aria-hidden="true" />
           </button>
         </span>
-        <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-caption font-medium', toneClass[status.tone])}>
-          {status.label}
+        <span className="flex shrink-0 items-center gap-1.5">
+          {resampleTag && (
+            <span className="rounded-full bg-warning-soft px-2 py-0.5 text-caption font-medium text-warning">{resampleTag}</span>
+          )}
+          <span className={cn('rounded-full px-2 py-0.5 text-caption font-medium', toneClass[status.tone])}>
+            {status.label}
+          </span>
         </span>
       </header>
 
@@ -206,6 +261,19 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
             <span aria-hidden="true" className="h-2.5 w-px bg-border" />
             <span className="tabular-nums">{order.phone}</span>
           </span>
+          {role === 'lab' && (
+            <span className="mt-0.5 flex min-w-0 items-center gap-1 text-caption">
+              <span
+                className={cn(
+                  'shrink-0 rounded px-1 text-tag font-medium',
+                  order.mode === 'self' ? 'bg-success-soft text-success' : 'bg-secondary text-primary',
+                )}
+              >
+                {order.mode === 'self' ? '自采样' : '定点'}
+              </span>
+              {order.mode === 'onsite' && <span className="truncate text-faint">{getSourceLabel(order)}</span>}
+            </span>
+          )}
         </span>
         <span className="flex shrink-0 flex-col items-end gap-1 self-stretch">
           <span className="text-title font-semibold tabular-nums text-foreground">
@@ -226,9 +294,11 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
             {actions.map((action) => {
               const className = cn(
                 'flex h-[30px] items-center rounded-full px-4 text-caption font-medium transition-transform active:scale-95',
-                action.primary
-                  ? 'bg-brand text-white shadow-brand'
-                  : 'border border-[#dfe6f0] bg-white text-foreground',
+                action.disabled
+                  ? 'cursor-not-allowed bg-muted text-faint active:scale-100'
+                  : action.primary
+                    ? 'bg-brand text-white shadow-brand'
+                    : 'border border-[#dfe6f0] bg-white text-foreground',
               )
               return action.tel ? (
                 <a
@@ -243,6 +313,7 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
                 <button
                   key={action.label}
                   type="button"
+                  disabled={action.disabled}
                   onClick={() => onAction?.(action.label, order)}
                   className={className}
                 >
@@ -256,6 +327,10 @@ function OrderCard({ order, onAction }: { order: Order; onAction?: (label: strin
       )}
     </article>
   )
+}
+
+function resampleTagStatus(order: Order) {
+  return order.mode === 'self' ? 'toReceive' : 'toSample'
 }
 
 function EmptyState({ keyword }: { keyword: string }) {

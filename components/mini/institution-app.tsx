@@ -12,8 +12,15 @@ import { LogisticsScreen } from './logistics-screen'
 import { OrderDetailScreen } from './order-detail-screen'
 import {
   SAMPLE_CODE_PATTERN,
+  canSeeOrder,
+  getSourceLabel,
   nowText,
+  orderStatuses,
   orders as seedOrders,
+  resampleReasons,
+  resampleReentry,
+  sampleModeLabel,
+  type InstitutionRole,
   type Order,
   type OrderStatus,
 } from './orders-data'
@@ -24,15 +31,28 @@ import { ShipBookingScreen } from './ship-booking-screen'
 import { historyOrders } from './stats-data'
 import { StatsScreen } from './stats-screen'
 import { ActivityListScreen } from './activity-feed'
-import { activities, institution, type ActivityItem, type InstitutionProfile } from './workbench-data'
+import {
+  activities,
+  institution,
+  labActivities,
+  labProfile,
+  labQuickActions,
+  quickActions,
+  todayMetrics,
+  type ActivityItem,
+  type InstitutionProfile,
+  type Metric,
+} from './workbench-data'
 import { WorkbenchScreen } from './workbench-screen'
 
 const copiedLabels = ['订单号已复制', '样本编号已复制', '运单号已复制']
-const CURRENT_STAFF = '店员 李晓'
+const PARTNER_STAFF = '店员 李晓'
+const LAB_STAFF = '检验员 陈静'
 
 export type InstitutionFlow =
   | { type: 'verify'; orderId?: string }
   | { type: 'sample'; orderId?: string }
+  | { type: 'detect'; orderId?: string }
   | { type: 'ship'; orderIds?: string[] }
   | { type: 'logistics'; orderId: string }
   | { type: 'report'; orderId: string }
@@ -40,8 +60,11 @@ export type InstitutionFlow =
 type Pending =
   | { type: 'verify'; code: string; orderId: string }
   | { type: 'sample'; code: string; orderId?: string }
+  | { type: 'detect'; code: string; orderId: string }
 
 export function InstitutionApp({
+  role = 'partner',
+  initialResampleId,
   initialTab = 'workbench',
   initialOrderStatus = 'all',
   initialOrderId,
@@ -54,17 +77,26 @@ export function InstitutionApp({
   initialOrderId?: string
   initialFlow?: InstitutionFlow
   initialShowActivities?: boolean
+  role?: InstitutionRole
+  initialResampleId?: string
   onLogout?: () => void
 }) {
+  const isLab = role === 'lab'
+  const CURRENT_STAFF = isLab ? LAB_STAFF : PARTNER_STAFF
+  const feed = isLab ? labActivities : activities
   const [tab, setTab] = useState<InstitutionTabKey>(initialTab)
-  const [profile, setProfile] = useState<InstitutionProfile>(institution)
+  const [profile, setProfile] = useState<InstitutionProfile>(isLab ? labProfile : institution)
   const [showSettings, setShowSettings] = useState(false)
-  const [orderList, setOrderList] = useState<Order[]>(seedOrders)
+  const [orderList, setOrderList] = useState<Order[]>(() =>
+    seedOrders.filter((o) => canSeeOrder(o, role, institution.code)),
+  )
   const [orderId, setOrderId] = useState<string | undefined>(initialOrderId)
   const [flow, setFlow] = useState<InstitutionFlow | undefined>(initialFlow)
   const [pending, setPending] = useState<Pending | undefined>()
   const [pickedOrderId, setPickedOrderId] = useState<string | undefined>()
   const [callOrder, setCallOrder] = useState<Order | undefined>()
+  const [resampleId, setResampleId] = useState<string | undefined>(initialResampleId)
+  const [resampleReason, setResampleReason] = useState<string>(resampleReasons[0])
   const [ordersKey, setOrdersKey] = useState(0)
   const [ordersStatus, setOrdersStatus] = useState<'all' | OrderStatus>(initialOrderStatus)
   const [showActivities, setShowActivities] = useState(initialShowActivities)
@@ -92,6 +124,7 @@ export function InstitutionApp({
   const startFlow = (label: string, order?: Order) => {
     if (label === '核销订单') setFlow({ type: 'verify', orderId: order?.id })
     else if (label === '扫码采样') setFlow({ type: 'sample', orderId: order?.id })
+    else if (label === '扫码检测') setFlow({ type: 'detect', orderId: order?.id })
     else if (label === '预约寄样') setFlow({ type: 'ship', orderIds: order ? [order.id] : undefined })
     else if (label === '查看物流' && order) setFlow({ type: 'logistics', orderId: order.id })
     else if (label === '查看报告' && order) setFlow({ type: 'report', orderId: order.id })
@@ -111,6 +144,15 @@ export function InstitutionApp({
     }
     if (label === '联系用户' && order) {
       setCallOrder(order)
+      return
+    }
+    if (label === '重采样' && order) {
+      setResampleReason(resampleReasons[0])
+      setResampleId(order.id)
+      return
+    }
+    if ((label === '客户同意重采样' || label === '客户申请退款') && order) {
+      decideResample(order.id, label === '客户同意重采样')
       return
     }
     if (startFlow(label, order)) return
@@ -141,6 +183,49 @@ export function InstitutionApp({
     showToast('样本已绑定订单')
   }
 
+  const confirmDetect = (id: string) => {
+    const time = nowText()
+    updateOrders([id], (o) => ({ status: 'testing', tester: CURRENT_STAFF, records: { ...o.records, 开始检测: time } }))
+    setPending(undefined)
+    setFlow(undefined)
+    setOrderId(id)
+    showToast('已开始检测，订单状态变更为检测中')
+  }
+
+  const confirmResample = (id: string) => {
+    const time = nowText()
+    updateOrders([id], (o) => ({
+      resample: {
+        state: 'pending',
+        reason: resampleReason,
+        at: time,
+        operator: CURRENT_STAFF,
+        snapshot: { status: o.status, sampleCode: o.sampleCode, tracking: o.tracking, records: o.records, tester: o.tester },
+      },
+    }))
+    setResampleId(undefined)
+    showToast('已通知客户确认是否重新采样')
+  }
+
+  const decideResample = (id: string, agree: boolean) => {
+    const time = nowText()
+    updateOrders([id], (o) => {
+      if (!o.resample) return {}
+      const resample = { ...o.resample, state: agree ? ('agreed' as const) : ('refunded' as const), decidedAt: time }
+      if (!agree) return { status: 'closed', resample }
+      const keep = ['用户下单', '支付成功', '订单核销', '寄出采样盒']
+      return {
+        status: resampleReentry(o),
+        resample,
+        sampleCode: undefined,
+        tracking: undefined,
+        tester: undefined,
+        records: Object.fromEntries(Object.entries(o.records ?? {}).filter(([k]) => keep.includes(k))),
+      }
+    })
+    showToast(agree ? '客户已同意重采样' : '客户已申请退款，订单已关闭')
+  }
+
   const submitShipping = (ids: string[]) => {
     const time = nowText()
     const tracking = `SF14${Date.now().toString().slice(-10)}`
@@ -148,6 +233,12 @@ export function InstitutionApp({
     setFlow(undefined)
     showToast(`已预约 ${ids.length} 件样本，快递员将尽快上门取件`)
   }
+
+  const labMetrics: Metric[] = [
+    { label: '待检测', value: byStatus('toTest').length, unit: '份', status: 'toTest' },
+    { label: '检测中', value: byStatus('testing').length, unit: '份', status: 'testing' },
+    { label: '今日出报告', value: 6, unit: '份', status: 'done' },
+  ]
 
   const toastNode = toast && (
     <div
@@ -177,10 +268,54 @@ export function InstitutionApp({
     </ActionSheet>
   )
 
+  const resampleOrder = resampleId ? findOrder(resampleId) : undefined
+  const resampleSheet = resampleOrder && (
+    <ActionSheet
+      title="发起重采样"
+      confirmLabel="确认发起"
+      onClose={() => setResampleId(undefined)}
+      onConfirm={() => confirmResample(resampleOrder.id)}
+    >
+      <OrderBrief order={resampleOrder} />
+      <dl className="mt-2 border-t border-border pt-2">
+        <SheetRow label="受检人" value={`${resampleOrder.patient}  ${resampleOrder.phone}`} />
+        <SheetRow label="样本编码" value={resampleOrder.sampleCode ?? '-'} />
+        <SheetRow label="采样方式" value={`${sampleModeLabel[resampleOrder.mode]}${resampleOrder.mode === 'onsite' ? ` · ${getSourceLabel(resampleOrder)}` : ''}`} />
+        <SheetRow label="当前状态" value={orderStatuses.find((s) => s.key === resampleOrder.status)?.label ?? ''} />
+      </dl>
+      <p className="mb-2 mt-3 text-note text-muted-foreground">重采样原因</p>
+      <ul role="radiogroup" aria-label="重采样原因" className="grid grid-cols-2 gap-2">
+        {resampleReasons.map((reason) => {
+          const active = resampleReason === reason
+          return (
+            <li key={reason}>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => setResampleReason(reason)}
+                className={cn(
+                  'flex h-9 w-full items-center justify-center rounded-xl border text-caption font-medium transition-colors',
+                  active ? 'border-primary bg-secondary text-primary' : 'border-border text-foreground',
+                )}
+              >
+                {reason}
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+      <p className="mt-3 text-caption leading-5 text-faint">
+        确认后将通知客户选择：同意重采样则订单回到{resampleOrder.mode === 'self' ? '「待收样」并重新寄出采样盒' : '「待采样」'}；不同意则全额退款并关闭订单。客户确认前按钮显示「待客户确认」且不可再次操作。
+      </p>
+    </ActionSheet>
+  )
+
   const shell = (content: React.ReactNode) => (
     <div className="relative flex h-full flex-col bg-background">
       {content}
       {callSheet}
+      {resampleSheet}
       {toastNode}
     </div>
   )
@@ -317,6 +452,68 @@ export function InstitutionApp({
     )
   }
 
+  if (flow?.type === 'detect') {
+    const target = findOrder(flow.orderId)
+    const testable = orderList.filter((o) => o.status === 'toTest' && o.resample?.state !== 'pending' && o.sampleCode)
+    const match = (code: string) => orderList.find((o) => o.sampleCode === code)
+    const pendingOrder = pending?.type === 'detect' ? findOrder(pending.orderId) : undefined
+    return shell(
+      <>
+        <ScanScreen
+          key={pending ? 'paused' : 'live'}
+          title="扫码检测"
+          tip="请扫描样本管上的样本编码条形码"
+          context={target ? `检测订单：${target.patient} · ${target.sampleCode}` : undefined}
+          manualLabel="样本编码"
+          manualPlaceholder="如 YW2610170045"
+          demoCode={target?.sampleCode ?? testable[0]?.sampleCode ?? 'YW2610170045'}
+          validate={(code) => {
+            if (!SAMPLE_CODE_PATTERN.test(code)) return '样本编码格式有误，应为 YW + 10 位数字'
+            const hit = match(code)
+            if (!hit) return '未找到该样本编码对应的订单'
+            if (target && hit.id !== target.id) return '样本编码与当前订单不一致'
+            if (hit.resample?.state === 'pending') return '该订单已发起重采样，等待客户确认'
+            if (hit.status !== 'toTest') {
+              const label = orderStatuses.find((s) => s.key === hit.status)?.label
+              return `该样本当前为「${label}」，仅待检测样本可开始检测`
+            }
+          }}
+          onBack={() => setFlow(undefined)}
+          onResult={(code) => {
+            const hit = match(code)
+            if (hit) setPending({ type: 'detect', code, orderId: hit.id })
+          }}
+        />
+        {pending?.type === 'detect' && pendingOrder && (
+          <ActionSheet
+            title="确认开始检测"
+            confirmLabel="确认检测"
+            onClose={() => setPending(undefined)}
+            onConfirm={() => confirmDetect(pendingOrder.id)}
+          >
+            <div className="rounded-xl bg-secondary px-3 py-2.5">
+              <p className="text-caption text-muted-foreground">样本编码</p>
+              <p className="text-title font-semibold tabular-nums text-primary">{pending.code}</p>
+            </div>
+            <div className="mt-3">
+              <OrderBrief order={pendingOrder} />
+            </div>
+            <dl className="mt-2 border-t border-border pt-2">
+              <SheetRow label="受检人" value={`${pendingOrder.patient}  ${pendingOrder.phone}`} />
+              <SheetRow
+                label="采样方式"
+                value={`${sampleModeLabel[pendingOrder.mode]}${pendingOrder.mode === 'onsite' ? ` · ${getSourceLabel(pendingOrder)}` : ''}`}
+              />
+              <SheetRow label="检测人员" value={CURRENT_STAFF} />
+              <SheetRow label="开始时间" value={nowText()} />
+            </dl>
+            <p className="mt-2 text-caption text-faint">确认后订单状态由「待检测」变更为「检测中」，并记录检测人员与时间。</p>
+          </ActionSheet>
+        )}
+      </>,
+    )
+  }
+
   if (flow?.type === 'ship') {
     return shell(
       <ShipBookingScreen
@@ -357,6 +554,7 @@ export function InstitutionApp({
     return shell(
       <OrderDetailScreen
         order={detailOrder}
+        role={role}
         onBack={() => setOrderId(undefined)}
         onAction={(label, order) => handleOrderAction(label, order)}
       />,
@@ -366,7 +564,7 @@ export function InstitutionApp({
   if (showActivities) {
     return shell(
       <ActivityListScreen
-        items={activities}
+        items={feed}
         readIds={readIds}
         onBack={() => setShowActivities(false)}
         onOpen={openActivity}
@@ -390,6 +588,9 @@ export function InstitutionApp({
       {tab === 'workbench' ? (
         <WorkbenchScreen
           profile={profile}
+          metrics={isLab ? labMetrics : todayMetrics}
+          actions={isLab ? labQuickActions : quickActions}
+          feed={feed}
           readIds={readIds}
           onOpenOrders={(status) => {
             setOrdersStatus(status)
@@ -402,15 +603,21 @@ export function InstitutionApp({
             else if (key === 'verify') setFlow({ type: 'verify' })
             else if (key === 'scan') setFlow({ type: 'sample' })
             else if (key === 'ship') setFlow({ type: 'ship' })
+            else if (key === 'detect') setFlow({ type: 'detect' })
+            else if (key === 'toTest' || key === 'reports') {
+              setOrdersStatus(key === 'toTest' ? 'toTest' : 'done')
+              setOrdersKey((k) => k + 1)
+              setTab('orders')
+            }
             else if (key === 'feed') setShowActivities(true)
             else if (key === 'activity') {
-              const item = activities.find((a) => a.id === label)
+              const item = feed.find((a) => a.id === label)
               if (item) openActivity(item)
             }
           }}
         />
       ) : tab === 'orders' ? (
-        <OrdersScreen key={ordersKey} orders={orderList} initialStatus={ordersStatus} onAction={handleOrderAction} />
+        <OrdersScreen key={ordersKey} orders={orderList} role={role} initialStatus={ordersStatus} onAction={handleOrderAction} />
       ) : (
         <StatsScreen orders={[...orderList, ...historyList]} onOpenOrder={(order) => setOrderId(order.id)} />
       )}

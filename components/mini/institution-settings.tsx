@@ -236,7 +236,9 @@ function InfoForm({
           <div className="divide-y divide-border rounded-2xl bg-white px-4 shadow-sm">
             <div className="flex min-h-14 items-center gap-3 py-3">
               <span className="w-[76px] shrink-0 text-body text-foreground">机构类型</span>
-              <span className="flex-1 text-right text-body text-muted-foreground">{profile.type}</span>
+              <span className="flex-1 text-right text-body text-muted-foreground">
+                {profile.role === 'lab' ? '实验室' : `合作机构 · ${profile.type}`}
+              </span>
             </div>
             <div className="flex min-h-14 items-center gap-3 py-3">
               <span className="w-[76px] shrink-0 text-body text-foreground">机构编号</span>

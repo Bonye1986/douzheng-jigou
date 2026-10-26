@@ -133,6 +133,8 @@ function generateHistory(): Order[] {
       const hasSample = !['closed', 'toSample'].includes(status)
       list.push({
         id: `h${list.length + 1}`,
+        mode: 'onsite',
+        institutionCode: 'JG-430102-0018',
         no,
         status,
         product: p.product,

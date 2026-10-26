@@ -11,18 +11,26 @@ import {
   institution,
   quickActions,
   todayMetrics,
+  type ActivityItem,
   type InstitutionProfile,
+  type Metric,
   type QuickActionKey,
 } from './workbench-data'
 import type { OrderStatus } from './orders-data'
 
 export function WorkbenchScreen({
   profile = institution,
+  metrics = todayMetrics,
+  actions = quickActions,
+  feed = activities,
   readIds,
   onAction,
   onOpenOrders,
 }: {
   profile?: InstitutionProfile
+  metrics?: Metric[]
+  actions?: typeof quickActions
+  feed?: ActivityItem[]
   readIds?: Set<string>
   onAction?: (key: QuickActionKey | 'activity' | 'feed' | 'profile', label: string) => void
   onOpenOrders?: (status: OrderStatus) => void
@@ -44,6 +52,7 @@ export function WorkbenchScreen({
       <div className="relative z-10 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-5 pt-2 [scrollbar-width:none] *:shrink-0">
         <InstitutionCard
           profile={profile}
+          metrics={metrics}
           onOpen={() => onAction?.('profile', '机构信息')}
           onMetric={(status) => onOpenOrders?.(status)}
         />
@@ -51,7 +60,7 @@ export function WorkbenchScreen({
         <section aria-labelledby="wb-quick" className="rounded-2xl bg-white p-4 shadow-sm">
           <SectionTitle id="wb-quick" title="常用功能" />
           <ul className="mt-3.5 grid grid-cols-4 gap-2">
-            {quickActions.map(({ key, label, icon }) => (
+            {actions.map(({ key, label, icon }) => (
               <li key={key}>
                 <button
                   type="button"
@@ -83,7 +92,7 @@ export function WorkbenchScreen({
           </div>
           <div className="mt-1">
             <ActivityRows
-              items={activities.slice(0, WORKBENCH_ACTIVITY_LIMIT)}
+              items={feed.slice(0, WORKBENCH_ACTIVITY_LIMIT)}
               readIds={readIds}
               onOpen={(item) => onAction?.('activity', item.id)}
             />
@@ -122,10 +131,12 @@ function InfoRow({
 
 function InstitutionCard({
   profile,
+  metrics,
   onOpen,
   onMetric,
 }: {
   profile: InstitutionProfile
+  metrics: Metric[]
   onOpen: () => void
   onMetric: (status: OrderStatus) => void
 }) {
@@ -160,7 +171,7 @@ function InstitutionCard({
                 {profile.name}
               </span>
               <span className="shrink-0 rounded-md bg-secondary px-1.5 py-px text-tag font-medium text-primary">
-                {profile.type}
+                {profile.role === 'lab' ? '实验室' : `合作机构 · ${profile.type}`}
               </span>
             </span>
             <span className="text-caption tabular-nums text-faint">编号 {profile.code}</span>
@@ -169,7 +180,7 @@ function InstitutionCard({
         </span>
 
         <span className="flex w-full flex-col gap-2.5 rounded-xl bg-[#f5f8fd] px-3 py-3">
-          <InfoRow icon={Clock} label="营业时间">
+          <InfoRow icon={Clock} label={profile.role === 'lab' ? '收样时间' : '营业时间'}>
             <span className="tabular-nums">
               {profile.openTime} - {profile.closeTime}
             </span>
@@ -186,7 +197,7 @@ function InstitutionCard({
         </span>
       </button>
       <ul className="mx-4 grid grid-cols-3 border-t border-dashed border-border py-2">
-        {todayMetrics.map((metric, index) => (
+        {metrics.map((metric, index) => (
           <li key={metric.label} className={cn('flex', index > 0 && 'border-l border-border')}>
             <button
               type="button"

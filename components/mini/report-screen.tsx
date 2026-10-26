@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Download, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
-import { getEventTime, patientProfiles, type Order } from './orders-data'
+import { getEventTime, getPatientProfile, type Order } from './orders-data'
 
 type Level = 'normal' | 'adjust' | 'caution'
 
@@ -51,7 +51,7 @@ export function ReportScreen({
   onDownload: () => void
 }) {
   const [filter, setFilter] = useState<'all' | Level>('all')
-  const profile = patientProfiles[order.id]
+  const profile = getPatientProfile(order)
   const issuedAt = getEventTime(order, '报告出具') ?? '-'
   const counts = drugs.reduce<Record<Level, number>>(
     (acc, d) => ({ ...acc, [d.level]: acc[d.level] + 1 }),
