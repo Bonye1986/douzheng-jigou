@@ -196,7 +196,7 @@ function InstitutionCard({
           </InfoRow>
         </span>
       </button>
-      <ul className={cn('mx-4 grid border-t border-dashed border-border py-2', metrics.length > 3 ? 'grid-cols-4' : 'grid-cols-3')}>
+      <ul className="mx-4 grid grid-cols-3 border-t border-dashed border-border py-2">
         {metrics.map((metric, index) => (
           <li key={metric.label} className={cn('flex', index > 0 && 'border-l border-border')}>
             <button

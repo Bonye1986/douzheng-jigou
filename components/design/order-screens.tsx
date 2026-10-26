@@ -127,7 +127,7 @@ export const labOrderScreens: BoardScreen[] = [
   {
     id: '11-1',
     title: '实验室 · 订单列表',
-    summary: '实验室账号的订单管理：具备合作机构的全部功能（处理本实验室的定点采样订单），并可查看平台全部自采样订单与所有机构的定点采样订单，对待检测样本扫码检测、发起重采样',
+    summary: '实验室账号的订单管理，可查看平台全部自采样订单与所有合作机构的定点采样订单，并对待检测样本扫码检测、发起重采样',
     fields: [
       '搜索框：订单号 / 样本编码 / 用户姓名 / 手机号 / 机构名称',
       '筛选入口：搜索框右侧「筛选」按钮，已设置条件时按钮高亮并显示角标',
@@ -149,13 +149,9 @@ export const labOrderScreens: BoardScreen[] = [
       '自采样状态流转：待付款 → 待发货 → 待收货 → 待收样 → 待检测 → 检测中 → 已完成',
       '定点采样状态流转：待付款 → 待核销 → 待采样 → 待寄样 → 待收样 → 待检测 → 检测中 → 已完成',
       '「待发货」「待收货」仅自采样订单有，「待核销」「待采样」「待寄样」仅定点采样订单有',
-      '实验室本身也是定点采样网点：用户可选择到实验室定点采样，此类订单采样机构显示为「本实验室」',
-      '本实验室的定点采样订单与合作机构操作一致——待核销：「联系用户」「核销订单」；待采样：「扫码采样」；待寄样：「预约寄样」',
-      ...orderStatuses
-        .filter((status) => !['toVerify', 'toSample', 'toShip'].includes(status.key))
-        .map((status) => `${status.label}：${actionText(labStatusActions[status.key])}`),
-      '其他合作机构的待核销 / 待采样 / 待寄样订单，实验室仅可查看，不可代为操作',
+      ...orderStatuses.map((status) => `${status.label}：${actionText(labStatusActions[status.key])}`),
       '已发起重采样、待客户确认的订单：按钮变为「待客户确认」并置灰，不可再点击，「扫码检测」同时隐藏',
+      '实验室不可执行核销、采样、寄样等机构操作',
     ],
     exceptions: ['筛选或搜索无结果：展示空状态', '网络异常：展示加载失败提示，下拉刷新重试'],
     node: <InstitutionApp role="lab" initialTab="orders" />,
