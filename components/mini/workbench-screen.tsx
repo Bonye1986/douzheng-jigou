@@ -10,7 +10,6 @@ import {
   activities,
   institution,
   quickActions,
-  todayMetrics,
   type ActivityItem,
   type InstitutionProfile,
   type Metric,
@@ -20,7 +19,7 @@ import type { OrderStatus } from './orders-data'
 
 export function WorkbenchScreen({
   profile = institution,
-  metrics = todayMetrics,
+  metrics,
   actions = quickActions,
   feed = activities,
   readIds,
@@ -28,7 +27,7 @@ export function WorkbenchScreen({
   onOpenOrders,
 }: {
   profile?: InstitutionProfile
-  metrics?: Metric[]
+  metrics: Metric[]
   actions?: typeof quickActions
   feed?: ActivityItem[]
   readIds?: Set<string>

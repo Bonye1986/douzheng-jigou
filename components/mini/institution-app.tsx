@@ -38,7 +38,6 @@ import {
   labProfile,
   labQuickActions,
   quickActions,
-  todayMetrics,
   type ActivityItem,
   type InstitutionProfile,
   type Metric,
@@ -88,7 +87,7 @@ export function InstitutionApp({
   const [profile, setProfile] = useState<InstitutionProfile>(isLab ? labProfile : institution)
   const [showSettings, setShowSettings] = useState(false)
   const [orderList, setOrderList] = useState<Order[]>(() =>
-    seedOrders.filter((o) => canSeeOrder(o, role, institution.code)),
+    [...seedOrders, ...historyOrders].filter((o) => canSeeOrder(o, role, institution.code)),
   )
   const [orderId, setOrderId] = useState<string | undefined>(initialOrderId)
   const [flow, setFlow] = useState<InstitutionFlow | undefined>(initialFlow)
@@ -104,9 +103,7 @@ export function InstitutionApp({
   const [toast, setToast] = useState('')
   const toastTimer = useRef<number | undefined>(undefined)
 
-  const [historyList, setHistoryList] = useState<Order[]>(historyOrders)
-
-  const findOrder = (id?: string) => orderList.find((o) => o.id === id) ?? historyList.find((o) => o.id === id)
+  const findOrder = (id?: string) => orderList.find((o) => o.id === id)
   const byStatus = (status: OrderStatus) => orderList.filter((o) => o.status === status)
 
   const showToast = (message: string) => {
@@ -118,7 +115,6 @@ export function InstitutionApp({
   const updateOrders = (ids: string[], patch: (order: Order) => Partial<Order>) => {
     const apply = (list: Order[]) => list.map((o) => (ids.includes(o.id) ? { ...o, ...patch(o) } : o))
     setOrderList(apply)
-    setHistoryList(apply)
   }
 
   const startFlow = (label: string, order?: Order) => {
@@ -234,11 +230,17 @@ export function InstitutionApp({
     showToast(`已预约 ${ids.length} 件样本，快递员将尽快上门取件`)
   }
 
-  const labMetrics: Metric[] = [
-    { label: '待检测', value: byStatus('toTest').length, unit: '份', status: 'toTest' },
-    { label: '检测中', value: byStatus('testing').length, unit: '份', status: 'testing' },
-    { label: '今日出报告', value: 6, unit: '份', status: 'done' },
-  ]
+  const metrics: Metric[] = isLab
+    ? [
+        { label: '待收样', value: byStatus('toReceive').length, unit: '份', status: 'toReceive' },
+        { label: '待检测', value: byStatus('toTest').length, unit: '份', status: 'toTest' },
+        { label: '检测中', value: byStatus('testing').length, unit: '份', status: 'testing' },
+      ]
+    : [
+        { label: '待核销', value: byStatus('toVerify').length, unit: '单', status: 'toVerify' },
+        { label: '待采样', value: byStatus('toSample').length, unit: '例', status: 'toSample' },
+        { label: '待寄样', value: byStatus('toShip').length, unit: '份', status: 'toShip' },
+      ]
 
   const toastNode = toast && (
     <div
@@ -588,7 +590,7 @@ export function InstitutionApp({
       {tab === 'workbench' ? (
         <WorkbenchScreen
           profile={profile}
-          metrics={isLab ? labMetrics : todayMetrics}
+          metrics={metrics}
           actions={isLab ? labQuickActions : quickActions}
           feed={feed}
           readIds={readIds}
@@ -619,7 +621,7 @@ export function InstitutionApp({
       ) : tab === 'orders' ? (
         <OrdersScreen key={ordersKey} orders={orderList} role={role} initialStatus={ordersStatus} onAction={handleOrderAction} />
       ) : (
-        <StatsScreen orders={[...orderList, ...historyList]} onOpenOrder={(order) => setOrderId(order.id)} />
+        <StatsScreen orders={orderList} onOpenOrder={(order) => setOrderId(order.id)} />
       )}
       <InstitutionTabBar active={tab} onSelect={setTab} />
     </>,

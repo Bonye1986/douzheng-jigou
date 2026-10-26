@@ -48,12 +48,6 @@ export const labProfile: InstitutionProfile = {
 
 export type Metric = { label: string; value: number; unit: string; status: OrderStatus }
 
-export const todayMetrics: Metric[] = [
-  { label: '今日核销', value: 12, unit: '单', status: 'toVerify' },
-  { label: '今日采样', value: 9, unit: '例', status: 'toSample' },
-  { label: '待寄样', value: 3, unit: '份', status: 'toShip' },
-]
-
 export type QuickActionKey = 'verify' | 'scan' | 'ship' | 'stats' | 'detect' | 'toTest' | 'reports'
 
 export const quickActions: { key: QuickActionKey; label: string; icon: string }[] = [
