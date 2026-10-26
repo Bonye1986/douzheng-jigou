@@ -280,7 +280,7 @@ function ResampleCard({
   const copy = resampleCopy[r.state]
   const next =
     r.state === 'pending'
-      ? '客户同意后订单回到' + (order.mode === 'self' ? '「待收样」，平台重新寄出采样盒' : '「待采样」，客户到店重新采样') + '；客户不同意则全额退款并关闭订单'
+      ? '客户同意后订单回到' + (order.mode === 'self' ? '「待收货」，平台重新寄出采样盒' : '「待采样」，客户到店重新采样') + '；客户不同意则全额退款并关闭订单'
       : r.state === 'agreed'
         ? order.mode === 'self'
           ? '平台已重新寄出采样盒，等待客户采样后寄回实验室'

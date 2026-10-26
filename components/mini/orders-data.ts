@@ -1,5 +1,7 @@
 export type OrderStatus =
   | 'unpaid'
+  | 'toDeliver'
+  | 'toArrive'
   | 'toVerify'
   | 'toSample'
   | 'toShip'
@@ -11,25 +13,33 @@ export type OrderStatus =
 
 export type StatusTone = 'warning' | 'primary' | 'success' | 'muted'
 
-export const orderStatuses: { key: OrderStatus; label: string; tone: StatusTone; hint: string }[] = [
-  { key: 'unpaid', label: '待付款', tone: 'warning', hint: '用户尚未完成支付，超时 30 分钟自动关闭' },
-  { key: 'toVerify', label: '待核销', tone: 'warning', hint: '用户到店后出示核销码，核销后进入采样' },
-  { key: 'toSample', label: '待采样', tone: 'primary', hint: '请扫描采样盒上的样本编码，将样本与订单绑定' },
-  { key: 'toShip', label: '待寄样', tone: 'primary', hint: '样本已采集，请预约物流上门取件，支持批量寄件' },
-  { key: 'toReceive', label: '待收样', tone: 'primary', hint: '样本运输中，实验室签收后进入检测' },
-  { key: 'toTest', label: '待检测', tone: 'primary', hint: '实验室已签收样本，等待上机检测' },
-  { key: 'testing', label: '检测中', tone: 'primary', hint: '样本检测中，报告出具后将通知用户' },
-  { key: 'done', label: '已完成', tone: 'success', hint: '检测报告已出具' },
-  { key: 'closed', label: '已关闭', tone: 'muted', hint: '订单已取消或超时关闭' },
+/** self：用户在家自采样并寄回实验室；onsite：用户到合作机构定点采样。 */
+export type SampleMode = 'self' | 'onsite'
+
+const BOTH: SampleMode[] = ['self', 'onsite']
+
+export const orderStatuses: { key: OrderStatus; label: string; tone: StatusTone; hint: string; modes: SampleMode[] }[] = [
+  { key: 'unpaid', label: '待付款', tone: 'warning', hint: '用户尚未完成支付，超时 30 分钟自动关闭', modes: BOTH },
+  { key: 'toDeliver', label: '待发货', tone: 'warning', hint: '用户已支付自采样订单，平台待寄出采样盒', modes: ['self'] },
+  { key: 'toArrive', label: '待收货', tone: 'primary', hint: '采样盒运输中，用户签收后自行采样并寄回实验室', modes: ['self'] },
+  { key: 'toVerify', label: '待核销', tone: 'warning', hint: '用户到店后出示核销码，核销后进入采样', modes: ['onsite'] },
+  { key: 'toSample', label: '待采样', tone: 'primary', hint: '请扫描采样盒上的样本编码，将样本与订单绑定', modes: ['onsite'] },
+  { key: 'toShip', label: '待寄样', tone: 'primary', hint: '样本已采集，请预约物流上门取件，支持批量寄件', modes: ['onsite'] },
+  { key: 'toReceive', label: '待收样', tone: 'primary', hint: '样本运输中，实验室签收后进入检测', modes: BOTH },
+  { key: 'toTest', label: '待检测', tone: 'primary', hint: '实验室已签收样本，等待上机检测', modes: BOTH },
+  { key: 'testing', label: '检测中', tone: 'primary', hint: '样本检测中，报告出具后将通知用户', modes: BOTH },
+  { key: 'done', label: '已完成', tone: 'success', hint: '检测报告已出具', modes: BOTH },
+  { key: 'closed', label: '已关闭', tone: 'muted', hint: '订单已取消或超时关闭', modes: BOTH },
 ]
+
+export function statusesForMode(mode: 'all' | SampleMode) {
+  return mode === 'all' ? orderStatuses : orderStatuses.filter((s) => s.modes.includes(mode))
+}
 
 export type OrderAction = { label: string; primary?: boolean; tel?: boolean; disabled?: boolean }
 
 /** 实验室（平台检测方）或合作机构（诊所 / 药店）。 */
 export type InstitutionRole = 'lab' | 'partner'
-
-/** self：用户在家自采样并寄回实验室；onsite：用户到合作机构定点采样。 */
-export type SampleMode = 'self' | 'onsite'
 
 export const sampleModeLabel: Record<SampleMode, string> = { self: '自采样', onsite: '定点采样' }
 
@@ -59,6 +69,8 @@ export type Resample = {
 /** Partner-facing actions; lab actions are derived in getOrderActions. */
 export const statusActions: Record<OrderStatus, OrderAction[]> = {
   unpaid: [],
+  toDeliver: [],
+  toArrive: [],
   toVerify: [{ label: '联系用户', tel: true }, { label: '核销订单', primary: true }],
   toSample: [{ label: '扫码采样', primary: true }],
   toShip: [{ label: '预约寄样', primary: true }],
@@ -96,6 +108,8 @@ export type Order = {
 
 export const labStatusActions: Record<OrderStatus, OrderAction[]> = {
   unpaid: [],
+  toDeliver: [],
+  toArrive: [{ label: '查看物流' }],
   toVerify: [],
   toSample: [],
   toShip: [],
@@ -318,6 +332,58 @@ export const orders: Order[] = [
     tester: '检验员 陈静',
   },
   {
+    id: '19',
+    mode: 'self',
+    no: 'DZ202610190045',
+    status: 'unpaid',
+    product: '叶酸代谢能力基因检测',
+    spec: 'MTHFR / MTRR 位点',
+    patient: '蒋*',
+    phone: '173****6612',
+    mobile: '17307316612',
+    time: '10-19 11:20',
+    amount: 299,
+  },
+  {
+    id: '20',
+    mode: 'self',
+    no: 'DZ202610190038',
+    status: 'toDeliver',
+    product: '高血压个体化用药基因检测',
+    spec: '覆盖 5 大类降压药',
+    patient: '夏*红',
+    phone: '151****0937',
+    mobile: '15107310937',
+    time: '10-19 10:05',
+    amount: 499,
+  },
+  {
+    id: '21',
+    mode: 'self',
+    no: 'DZ202610180102',
+    status: 'toDeliver',
+    product: '药物基因检测 · 心脑血管用药',
+    spec: '覆盖 32 种常用药物',
+    patient: '易*',
+    phone: '189****2264',
+    mobile: '18907312264',
+    time: '10-18 21:46',
+    amount: 699,
+  },
+  {
+    id: '22',
+    mode: 'self',
+    no: 'DZ202610180057',
+    status: 'toArrive',
+    product: '药物基因检测 · 精神类用药',
+    spec: '覆盖 46 种常用药物',
+    patient: '廖*静',
+    phone: '134****5180',
+    mobile: '13407315180',
+    time: '10-18 09:32',
+    amount: 899,
+  },
+  {
     id: '13',
     mode: 'self',
     no: 'DZ202610180093',
@@ -432,6 +498,8 @@ export function getOrder(id: string) {
 
 const flowIndex: Record<OrderStatus, number> = {
   unpaid: 0,
+  toDeliver: 1,
+  toArrive: 1,
   toVerify: 1,
   toSample: 2,
   toShip: 3,
@@ -468,6 +536,10 @@ export const patientProfiles: Record<string, { gender: '男' | '女'; age: numbe
   '16': { gender: '女', age: 60 },
   '17': { gender: '男', age: 64 },
   '18': { gender: '女', age: 27 },
+  '19': { gender: '男', age: 39 },
+  '20': { gender: '女', age: 61 },
+  '21': { gender: '男', age: 50 },
+  '22': { gender: '女', age: 33 },
 }
 
 export function getPatientProfile(order: Order) {
@@ -501,6 +573,8 @@ const selfTemplates: EventTemplate[] = [
 
 const selfFlowIndex: Record<OrderStatus, number> = {
   unpaid: 0,
+  toDeliver: 1,
+  toArrive: 2,
   toVerify: 1,
   toSample: 2,
   toShip: 2,
@@ -560,7 +634,7 @@ function baseEvents(order: Order, from = 0): OrderEvent[] {
 
 /** Status the order returns to once the customer agrees to resample. */
 export function resampleReentry(order: Order): OrderStatus {
-  return order.mode === 'self' ? 'toReceive' : 'toSample'
+  return order.mode === 'self' ? 'toArrive' : 'toSample'
 }
 
 export function getOrderEvents(order: Order): OrderEvent[] {

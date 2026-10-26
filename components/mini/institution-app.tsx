@@ -306,7 +306,7 @@ export function InstitutionApp({
         })}
       </ul>
       <p className="mt-3 text-caption leading-5 text-faint">
-        确认后将通知客户选择：同意重采样则订单回到{resampleOrder.mode === 'self' ? '「待收样」并重新寄出采样盒' : '「待采样」'}；不同意则全额退款并关闭订单。客户确认前按钮显示「待客户确认」且不可再次操作。
+        确认后将通知客户选择：同意重采样则订单回到{resampleOrder.mode === 'self' ? '「待收货」并重新寄出采样盒' : '「待采样」'}；不同意则全额退款并关闭订单。客户确认前按钮显示「待客户确认」且不可再次操作。
       </p>
     </ActionSheet>
   )
