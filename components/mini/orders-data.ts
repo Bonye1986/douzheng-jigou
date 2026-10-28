@@ -518,7 +518,7 @@ export const orders: Order[] = [
     },
   },
   {
-    id: '19',
+    id: '24',
     mode: 'onsite',
     institutionCode: LAB_CODE,
     no: 'DZ202610200011',
@@ -533,7 +533,7 @@ export const orders: Order[] = [
     verifyCode: '73150286',
   },
   {
-    id: '20',
+    id: '25',
     mode: 'onsite',
     institutionCode: LAB_CODE,
     no: 'DZ202610200024',
@@ -549,7 +549,7 @@ export const orders: Order[] = [
     verifier: '检验员 陈静',
   },
   {
-    id: '21',
+    id: '26',
     mode: 'onsite',
     institutionCode: LAB_CODE,
     no: 'DZ202610190057',
