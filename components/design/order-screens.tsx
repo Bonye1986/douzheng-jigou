@@ -1,30 +1,30 @@
 import type { BoardScreen } from './design-board'
 import { InstitutionApp } from '@/components/mini/institution-app'
-import { labStatusActions, orderStatuses, orders, statusActions, type OrderAction, type OrderStatus } from '@/components/mini/orders-data'
+import {
+  canSeeOrder,
+  labStatusActions,
+  orderStatuses,
+  orders,
+  statusActions,
+  type OrderAction,
+  type OrderStatus,
+} from '@/components/mini/orders-data'
+import { historyOrders } from '@/components/mini/stats-data'
+import { institution } from '@/components/mini/workbench-data'
 
 type DetailSpec = Pick<BoardScreen, 'summary' | 'fields' | 'flow' | 'rules' | 'exceptions'>
 
-const detailSpecs: Record<OrderStatus, DetailSpec> = {
+const allOrders = [...orders, ...historyOrders]
+
+const commonDetailField = '通用模块：检测项目与金额、受检人信息（姓名、性别、年龄、手机号）、订单号（可复制）、订单跟踪时间轴'
+
+const detailSpecs: Partial<Record<OrderStatus, DetailSpec>> = {
   unpaid: {
     summary: '用户已下单但尚未支付的订单详情，机构仅可查看，等待用户完成支付',
     fields: ['状态头：「待付款」+ 剩余支付时间提示', '金额区：应付金额', '订单信息：订单号、下单时间（不展示支付方式与支付时间）'],
     flow: ['在订单列表点击待付款订单进入', '查看订单与受检人信息', '用户完成支付后订单自动流转至「待核销」'],
     rules: ['机构端无操作按钮，不可代付或修改金额', '下单后 30 分钟未支付自动关闭，流转至「已关闭」，关闭原因为「超时未支付」'],
     exceptions: ['停留期间订单超时关闭：返回列表时刷新状态，详情页展示已关闭信息'],
-  },
-  toDeliver: {
-    summary: '用户已支付的自采样订单详情，平台待寄出采样盒（仅实验室可见）',
-    fields: ['状态头：「待发货」+「平台待寄出采样盒」', '金额区：实付金额', '订单信息：订单号、采样方式「自采样」、下单时间、支付方式、支付时间', '订单跟踪：「用户下单」「支付成功」节点'],
-    flow: ['平台仓库打包采样盒并通过顺丰寄出', '寄出后订单自动流转至「待收货」'],
-    rules: ['自采样订单专属状态，合作机构不可见', '实验室页面无底部操作栏，仅可查看', '支付成功后 24 小时内寄出采样盒'],
-    exceptions: ['用户申请退款：未发货订单可直接退款并关闭'],
-  },
-  toArrive: {
-    summary: '采样盒运输中、等待用户签收的自采样订单详情（仅实验室可见）',
-    fields: ['状态头：「待收货」+「采样盒运输中」', '订单跟踪：新增「寄出采样盒」节点', '底部操作栏：「查看物流」'],
-    flow: ['点击「查看物流」查看采样盒寄送轨迹', '用户签收后自行采样并寄回，寄回后订单流转至「待收样」'],
-    rules: ['自采样订单专属状态，合作机构不可见', '客户同意重采样后，自采样订单回到「待收货」，平台重新寄出采样盒'],
-    exceptions: ['采样盒运输超 72 小时未签收：平台客服介入跟进'],
   },
   toVerify: {
     summary: '用户已支付、待到店核销的订单详情，机构核对受检人信息后扫码核销',
@@ -55,17 +55,17 @@ const detailSpecs: Record<OrderStatus, DetailSpec> = {
     exceptions: ['物流信息暂未更新：提示「快递员揽收后更新轨迹」', '运输超 72 小时未签收：平台客服介入跟进'],
   },
   toTest: {
-    summary: '实验室已签收、等待上机检测的订单详情（合作机构视角）',
+    summary: '实验室已签收、等待上机检测的订单详情，合作机构仅可查看',
     fields: ['状态头：「待检测」', '订单跟踪：新增「实验室签收」节点'],
     flow: ['查看样本签收信息', '实验室扫码检测后订单流转至「检测中」'],
-    rules: ['合作机构页面无底部操作栏，仅可查看', '实验室账号底部操作栏为「重采样」「扫码检测」，见「实验室 · 订单详情」'],
+    rules: ['合作机构页面无底部操作栏，仅可查看', '检测、重采样由实验室操作，见「实验室 · 订单管理」分组'],
     exceptions: ['实验室发起重采样：顶部新增「重采样」卡片，状态旁显示「重采样待确认」，等待客户选择'],
   },
   testing: {
-    summary: '样本正在实验室检测的订单详情（合作机构视角）',
+    summary: '样本正在实验室检测的订单详情，合作机构仅可查看',
     fields: ['状态头：「检测中」+「报告出具后将通知用户」', '订单跟踪：新增「开始检测」节点，含检测人', '订单信息：新增检测时间、检测人员'],
     flow: ['在订单跟踪时间轴查看「开始检测」节点', '报告出具后订单自动流转至「已完成」并通知用户'],
-    rules: ['合作机构页面无底部操作栏，仅可查看', '实验室账号可「重采样」', '检测周期以检测项目说明为准'],
+    rules: ['合作机构页面无底部操作栏，仅可查看', '检测周期以检测项目说明为准'],
     exceptions: ['实验室发起重采样：顶部新增「重采样」卡片，等待客户选择'],
   },
   done: {
@@ -132,8 +132,8 @@ export const labOrderScreens: BoardScreen[] = [
       '搜索框：订单号 / 样本编码 / 用户姓名 / 手机号 / 机构名称',
       '筛选入口：搜索框右侧「筛选」按钮，已设置条件时按钮高亮并显示角标',
       '筛选弹层：采样方式（全部 / 自采样 / 定点采样）、订单归属（全部 / 本机构订单 / 外包机构订单）、订单状态（全部 + 当前采样方式下的具体状态），底部「重置」「确定」',
-      '已选采样方式条：搜索框下方显示已选采样方式标签，点击 × 清除',
-      '状态标签：全部 + 当前采样方式下的状态，数量随采样方式筛选变化',
+      '已选条件条：搜索框下方显示已选的采样方式 / 订单归属标签，点击 × 单独清除',
+      '状态标签：全部 + 当前采样方式下的状态，数量随筛选条件实时变化；列表顶部不展示状态提示语',
       '订单卡片：在受检人下方新增来源行——「自采样」绿色标签，或「定点」蓝色标签 + 采样机构名称',
     ],
     flow: [
@@ -148,6 +148,7 @@ export const labOrderScreens: BoardScreen[] = [
     rules: [
       '数据权限：实验室可查看平台全部自采样订单与所有机构的定点采样订单',
       '订单归属：本机构订单 = 用户选择到本实验室定点采样的订单；外包机构订单 = 其他合作机构的定点采样订单；自采样订单不属于任一归属',
+      '筛选结果须与条件完全一致：选择「本机构订单」时列表只展示采样机构为「本实验室」的定点采样订单',
       '自采样状态流转：待付款 → 待发货 → 待收货 → 待收样 → 待检测 → 检测中 → 已完成',
       '定点采样状态流转：待付款 → 待核销 → 待采样 → 待寄样 → 待收样 → 待检测 → 检测中 → 已完成',
       '「待发货」「待收货」仅自采样订单有，「待核销」「待采样」「待寄样」仅定点采样订单有',
@@ -163,8 +164,9 @@ export const labOrderScreens: BoardScreen[] = [
     exceptions: ['筛选或搜索无结果：展示空状态', '网络异常：展示加载失败提示，下拉刷新重试'],
     node: <InstitutionApp role="lab" initialTab="orders" />,
   },
+  ...labDetailScreens(),
   {
-    id: '11-2',
+    id: '11-6',
     title: '实验室 · 扫码检测',
     summary: '实验室扫描样本管上的样本编码，确认后对应订单由「待检测」变更为「检测中」',
     fields: [
@@ -177,7 +179,7 @@ export const labOrderScreens: BoardScreen[] = [
       '从待检测订单「扫码检测」或工作台「扫码检测」进入，自动唤起摄像头',
       '对准样本管条码自动识别，或点击「手动输入」填写样本编码后点击「确认」',
       '弹出确认弹层，核对信息后点击「确认检测」',
-      'Toast 提示「已开始检测」，订单状态变更为「检测中」并进入订单详情，订单跟踪新增「开始检测」节点',
+      'Toast 提���「已开始检测」，订单状态变更为「检测中」并进入订单详情，订单跟踪新增「开始检测」节点',
     ],
     rules: [
       '仅「待检测」且未发起重采样的订单可扫码检测',
@@ -195,7 +197,7 @@ export const labOrderScreens: BoardScreen[] = [
     node: <InstitutionApp role="lab" initialTab="orders" initialFlow={{ type: 'detect', orderId: '6' }} />,
   },
   {
-    id: '11-3',
+    id: '11-7',
     title: '实验室 · 发起重采样',
     summary: '样本不合格或检测失败时，实验室对待检测 / 检测中订单发起重采样，通知客户确认',
     fields: [
@@ -218,7 +220,7 @@ export const labOrderScreens: BoardScreen[] = [
     node: <InstitutionApp role="lab" initialTab="orders" initialOrderId="14" initialResampleId="14" />,
   },
   {
-    id: '11-4',
+    id: '11-8',
     title: '实验室 · 重采样待客户确认',
     summary: '已发起重采样的订单详情，底部按钮显示「待客户确认」且不可点击，根据客户选择决定订单后续状态',
     fields: [
@@ -241,17 +243,17 @@ export const labOrderScreens: BoardScreen[] = [
     node: <InstitutionApp role="lab" initialTab="orders" initialOrderId="15" />,
   },
   {
-    id: '11-5',
+    id: '11-9',
     title: '重采样 · 客户同意',
     summary: '客户同意重采样后，定点采样订单回到「待采样」，合作机构为客户重新扫码采��',
     fields: ['状态头：「待采样」', '重采样卡片：「客户已同意重采样」+ 客户确认时间 + 原样本编号', '订单跟踪：发起重采样 → 客户同意重采样', '底部操作栏：「扫码采样」'],
     flow: ['客户到店后，机构点击「扫码采样」绑定新的采样盒', '之后按正常流程寄样、收样、检测'],
-    rules: ['订单列表状态旁显示「重采样」标签', '重采样不再重新核销，不产生额外费用'],
+    rules: ['订单列表状态旁显示「重采样」标签', '重采样不再重新���销，不产生额外费用'],
     exceptions: ['新样本编码与原编码相同：提示「该样本编码已使用，请更换采样盒」'],
     node: <InstitutionApp initialTab="orders" initialOrderStatus="toSample" initialOrderId="17" />,
   },
   {
-    id: '11-6',
+    id: '11-10',
     title: '重采样 · 客户退款',
     summary: '客户不同意重采样时，订单全额退款并关闭',
     fields: ['状态头：「已关闭」+ 关闭时间（客户确认时间）', '重采样卡片：「客户已选择退款」', '订单信息：关闭原因「客户不同意重采样，已全额退款」', '订单跟踪：发起重采样 → 客户申请退款'],
@@ -343,20 +345,88 @@ export const orderFlowScreens: BoardScreen[] = [
   },
 ]
 
-export const orderDetailScreens: BoardScreen[] = orderStatuses.map((status, index) => {
-  const order = orders.find((o) => o.status === status.key) ?? orders[0]
-  const spec = detailSpecs[status.key]
-  return {
-    id: `09-${index + 1}`,
-    title: `订单详情 · ${status.label}`,
-    summary: spec.summary,
-    fields: [
-      ...spec.fields,
-      '通用模块：检测项目与金额、受检人信息（姓名、性别、年龄、手机号）、订单号（可复制）、订单跟踪时间轴',
-    ],
-    flow: [...spec.flow, '点击左上角返回订单列表'],
-    rules: spec.rules,
-    exceptions: spec.exceptions,
-    node: <InstitutionApp initialTab="orders" initialOrderStatus={status.key} initialOrderId={order.id} />,
-  }
-})
+export const orderDetailScreens: BoardScreen[] = orderStatuses
+  .filter((status) => status.modes.includes('onsite'))
+  .map((status, index) => {
+    const order =
+      allOrders.find((o) => o.status === status.key && canSeeOrder(o, 'partner', institution.code)) ?? orders[0]
+    const spec = detailSpecs[status.key]!
+    return {
+      id: `09-${index + 1}`,
+      title: `订单详情 · ${status.label}`,
+      summary: spec.summary,
+      fields: [...spec.fields, commonDetailField],
+      flow: [...spec.flow, '点击左上角返回订单列表'],
+      rules: spec.rules,
+      exceptions: spec.exceptions,
+      node: <InstitutionApp initialTab="orders" initialOrderStatus={status.key} initialOrderId={order.id} />,
+    }
+  })
+
+function getLabDetailSpecs(): { status: OrderStatus; title: string; spec: DetailSpec }[] {
+  return [
+  {
+    status: 'toDeliver',
+    title: '实验室 · 自采样详情 · 待发货',
+    spec: {
+      summary: '用户已支付的自采样订单详情，平台待寄出采样盒，实验室仅可查看',
+      fields: ['状态头：「待发货」+「平台待寄出采样盒」', '金额区：实付金额', '订单信息：订单号、采样方式「自采样」、下单时间、支付方式、支付时间', '订单跟踪：「用户下单」「支付成功」节点'],
+      flow: ['平台仓库打包采样盒并通过顺丰寄出', '寄出后订单自动流转至「待收货」'],
+      rules: ['自采样订单专属状态，合作机构不可见', '页面无底部操作栏，仅可查看', '支付成功后 24 小时内寄出采样盒'],
+      exceptions: ['用户申请退款：未发货订单可直接退款并关闭'],
+    },
+  },
+  {
+    status: 'toArrive',
+    title: '实验室 · 自采样详情 · 待收货',
+    spec: {
+      summary: '采样盒运输中、等待用户签收的自采样订单详情',
+      fields: ['状态头：「待收货」+「采样盒运输中」', '订单跟踪：新增「寄出采样盒」节点', '底部操作栏：「查看物流」'],
+      flow: ['点击「查看物流」查看采样盒寄送轨迹', '用户签收后自行采样并寄回，寄回后订单流转至「待收样」'],
+      rules: ['自采样订单专属状态，合作机构不可见', '客户同意重采样后，自采样订单回到「待收货」，平台重新寄出采样盒'],
+      exceptions: ['采样盒运输超 72 小时未签收：平台客服介入跟进'],
+    },
+  },
+  {
+    status: 'toTest',
+    title: '实验室 · 订单详情 · 待检测',
+    spec: {
+      summary: '实验室已签收样本、等待上机检测的订单详情，自采样与各机构定点采样订单均可操作',
+      fields: ['状态头：「待检测」', '订单信息：采样方式（自采样 / 定点采样 · 机构名称）', '订单跟踪：新增「实验室签收」节点', '底部操作栏：「重采样」「扫码检测」'],
+      flow: ['点击「扫码检测」进入扫码检测页，确认后订单变更为「检测中」', '点击「重采样」弹出重采样确认弹层'],
+      rules: ['已发起重采样待客户确认时，「重采样」变为「待客户确认」置灰，「扫码检测」隐藏'],
+      exceptions: ['订单状态已变化：提示「订单状态已更新」并刷新'],
+    },
+  },
+  {
+    status: 'testing',
+    title: '实验室 · 订单详情 · 检测中',
+    spec: {
+      summary: '样本正在检测的订单详情，检测失败或样本不合格时可发起重采样',
+      fields: ['状态头：「检测中」', '订单信息：新增检测时间、检测人员', '订单跟踪：新增「开始检测」节点，含检测人', '底部操作栏：「重采样」'],
+      flow: ['报告出具后订单自动流转至「已完成」并通知用户', '点击「重采样」弹出重采样确认弹层'],
+      rules: ['检测周期以检测项目说明为准', '已发起重采样待客户确认时，按钮变为「待客户确认」置灰'],
+      exceptions: ['报告出具失败：由实验室发起重采样或联系平台处理'],
+    },
+  },
+]
+}
+
+function labDetailScreens(): BoardScreen[] {
+  return getLabDetailSpecs().map(({ status, title, spec }, index) => {
+    const order =
+      allOrders.find((o) => o.status === status && o.mode === 'self' && !o.resample) ??
+      allOrders.find((o) => o.status === status) ??
+      orders[0]
+    return {
+      id: `11-${index + 2}`,
+      title,
+      summary: spec.summary,
+      fields: [...spec.fields, commonDetailField],
+      flow: [...spec.flow, '点击左上角返回订单列表'],
+      rules: spec.rules,
+      exceptions: spec.exceptions,
+      node: <InstitutionApp role="lab" initialTab="orders" initialOrderStatus={status} initialOrderId={order.id} />,
+    }
+  })
+}
