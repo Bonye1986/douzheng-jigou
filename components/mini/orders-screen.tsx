@@ -5,11 +5,12 @@ import Image from 'next/image'
 import { ChevronRight, Copy, Search, SlidersHorizontal, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavBar, StatusBar } from './phone-frame'
-import { OrderFilterSheet, type ModeKey } from './order-filter-sheet'
+import { OrderFilterSheet, ownerLabel, type ModeKey, type OwnerKey } from './order-filter-sheet'
 import {
   getOrderActions,
   getProductImage,
   getSourceLabel,
+  isLabOwnOrder,
   orderStatuses,
   resampleReentry,
   sampleModeLabel,
@@ -47,14 +48,21 @@ export function OrdersScreen({
 }) {
   const [filter, setFilter] = useState<FilterKey>(initialStatus)
   const [source, setSource] = useState<ModeKey>('all')
+  const [owner, setOwner] = useState<OwnerKey>('all')
   const [filterOpen, setFilterOpen] = useState(false)
   const [keyword, setKeyword] = useState('')
   const isLab = role === 'lab'
-  const filtered = source !== 'all' || filter !== 'all'
+  const filtered = source !== 'all' || filter !== 'all' || owner !== 'all'
 
   const orders = useMemo(
-    () => (source === 'all' ? allOrders : allOrders.filter((o) => o.mode === source)),
-    [allOrders, source],
+    () =>
+      allOrders.filter((o) => {
+        if (source !== 'all' && o.mode !== source) return false
+        if (owner === 'own') return isLabOwnOrder(o)
+        if (owner === 'outsourced') return o.mode === 'onsite' && !isLabOwnOrder(o)
+        return true
+      }),
+    [allOrders, source, owner],
   )
 
   const counts = useMemo(() => {
@@ -128,21 +136,27 @@ export function OrdersScreen({
             </button>
           )}
         </div>
-        {isLab && source !== 'all' && (
-          <div className="flex items-center gap-2 px-4 pb-2">
-            <span className="text-caption text-faint">采样方式</span>
-            <button
-              type="button"
-              onClick={() => {
-                setSource('all')
-                selectTab(filter)
-              }}
-              aria-label={`清除采样方式筛选：${sampleModeLabel[source]}`}
-              className="flex h-6 items-center gap-1 rounded-full bg-secondary pl-2.5 pr-1.5 text-caption font-medium text-primary"
-            >
-              {sampleModeLabel[source]}
-              <X className="size-3" aria-hidden="true" />
-            </button>
+        {isLab && (source !== 'all' || owner !== 'all') && (
+          <div className="flex flex-wrap items-center gap-2 px-4 pb-2">
+            <span className="text-caption text-faint">已选</span>
+            {source !== 'all' && (
+              <FilterChip
+                label={sampleModeLabel[source]}
+                ariaLabel={`清除采样方式筛选：${sampleModeLabel[source]}`}
+                onClear={() => {
+                  setSource('all')
+                  setOwner('all')
+                  selectTab(filter)
+                }}
+              />
+            )}
+            {owner !== 'all' && (
+              <FilterChip
+                label={ownerLabel[owner]}
+                ariaLabel={`清除订单归属筛选：${ownerLabel[owner]}`}
+                onClear={() => setOwner('all')}
+              />
+            )}
           </div>
         )}
         <div
@@ -212,9 +226,11 @@ export function OrdersScreen({
         <OrderFilterSheet
           mode={source}
           status={filter}
+          owner={owner}
           onClose={() => setFilterOpen(false)}
-          onApply={(mode, status) => {
+          onApply={(mode, status, nextOwner) => {
             setSource(mode)
+            setOwner(nextOwner)
             selectTab(status)
             setFilterOpen(false)
           }}
@@ -363,5 +379,19 @@ function EmptyState({ keyword }: { keyword: string }) {
         {keyword ? `未找到与「${keyword}」相关的订单` : '暂无该状态的订单'}
       </p>
     </div>
+  )
+}
+
+function FilterChip({ label, ariaLabel, onClear }: { label: string; ariaLabel: string; onClear: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClear}
+      aria-label={ariaLabel}
+      className="flex h-6 items-center gap-1 rounded-full bg-secondary pl-2.5 pr-1.5 text-caption font-medium text-primary"
+    >
+      {label}
+      <X className="size-3" aria-hidden="true" />
+    </button>
   )
 }

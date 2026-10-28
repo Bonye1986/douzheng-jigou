@@ -7,6 +7,18 @@ import { statusesForMode, type OrderStatus, type SampleMode } from './orders-dat
 
 export type ModeKey = 'all' | SampleMode
 export type StatusKey = 'all' | OrderStatus
+export type OwnerKey = 'all' | 'own' | 'outsourced'
+
+export const ownerLabel: Record<Exclude<OwnerKey, 'all'>, string> = {
+  own: '本机构订单',
+  outsourced: '外包机构订单',
+}
+
+const ownerOptions: { key: OwnerKey; label: string }[] = [
+  { key: 'all', label: '全部' },
+  { key: 'own', label: ownerLabel.own },
+  { key: 'outsourced', label: ownerLabel.outsourced },
+]
 
 const modeOptions: { key: ModeKey; label: string }[] = [
   { key: 'all', label: '全部' },
@@ -17,21 +29,30 @@ const modeOptions: { key: ModeKey; label: string }[] = [
 export function OrderFilterSheet({
   mode,
   status,
+  owner,
   onApply,
   onClose,
 }: {
   mode: ModeKey
   status: StatusKey
-  onApply: (mode: ModeKey, status: StatusKey) => void
+  owner: OwnerKey
+  onApply: (mode: ModeKey, status: StatusKey, owner: OwnerKey) => void
   onClose: () => void
 }) {
   const [draftMode, setDraftMode] = useState<ModeKey>(mode)
   const [draftStatus, setDraftStatus] = useState<StatusKey>(status)
+  const [draftOwner, setDraftOwner] = useState<OwnerKey>(owner)
   const statusOptions: { key: StatusKey; label: string }[] = [{ key: 'all', label: '全部' }, ...statusesForMode(draftMode)]
 
   const pickMode = (next: ModeKey) => {
     setDraftMode(next)
+    if (next === 'self') setDraftOwner('all')
     if (draftStatus !== 'all' && !statusesForMode(next).some((s) => s.key === draftStatus)) setDraftStatus('all')
+  }
+
+  const pickOwner = (next: OwnerKey) => {
+    setDraftOwner(next)
+    if (next !== 'all' && draftMode !== 'onsite') pickMode('onsite')
   }
 
   return (
@@ -51,6 +72,7 @@ export function OrderFilterSheet({
         </header>
         <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pb-2 [scrollbar-width:none]">
           <OptionGroup label="采样方式" options={modeOptions} value={draftMode} onChange={pickMode} />
+          <OptionGroup label="订单归属" options={ownerOptions} value={draftOwner} onChange={pickOwner} />
           <OptionGroup label="订单状态" options={statusOptions} value={draftStatus} onChange={setDraftStatus} />
         </div>
         <footer className="flex shrink-0 gap-3 px-4 pb-8 pt-3">
@@ -59,6 +81,7 @@ export function OrderFilterSheet({
             onClick={() => {
               setDraftMode('all')
               setDraftStatus('all')
+              setDraftOwner('all')
             }}
             className="h-11 flex-1 rounded-full border border-[#dfe6f0] bg-white text-body font-medium text-foreground transition-transform active:scale-[0.98]"
           >
@@ -66,7 +89,7 @@ export function OrderFilterSheet({
           </button>
           <button
             type="button"
-            onClick={() => onApply(draftMode, draftStatus)}
+            onClick={() => onApply(draftMode, draftStatus, draftOwner)}
             className="h-11 flex-[2] rounded-full bg-brand text-body font-medium text-white shadow-brand transition-transform active:scale-[0.98]"
           >
             确定
