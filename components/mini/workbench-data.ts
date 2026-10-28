@@ -58,6 +58,9 @@ export const quickActions: { key: QuickActionKey; label: string; icon: string }[
 ]
 
 export const labQuickActions: { key: QuickActionKey; label: string; icon: string }[] = [
+  { key: 'verify', label: '订单核销', icon: instIcons.verify },
+  { key: 'scan', label: '扫码采样', icon: instIcons.sample },
+  { key: 'ship', label: '预约寄样', icon: instIcons.ship },
   { key: 'detect', label: '扫码检测', icon: instIcons.scan },
   { key: 'toTest', label: '待检测', icon: instIcons.arrived },
   { key: 'reports', label: '检测报告', icon: instIcons.report },

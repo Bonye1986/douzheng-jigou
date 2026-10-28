@@ -14,6 +14,7 @@ import {
   SAMPLE_CODE_PATTERN,
   canSeeOrder,
   getSourceLabel,
+  isLabOwnOrder,
   nowText,
   orderStatuses,
   orders as seedOrders,
@@ -105,6 +106,7 @@ export function InstitutionApp({
 
   const findOrder = (id?: string) => orderList.find((o) => o.id === id)
   const byStatus = (status: OrderStatus) => orderList.filter((o) => o.status === status)
+  const ownByStatus = (status: OrderStatus) => byStatus(status).filter((o) => !isLab || isLabOwnOrder(o))
 
   const showToast = (message: string) => {
     window.clearTimeout(toastTimer.current)
@@ -209,7 +211,7 @@ export function InstitutionApp({
       if (!o.resample) return {}
       const resample = { ...o.resample, state: agree ? ('agreed' as const) : ('refunded' as const), decidedAt: time }
       if (!agree) return { status: 'closed', resample }
-      const keep = ['用户下单', '支付成功', '订单核销', '寄出采样盒']
+      const keep = ['用户下���', '支付成功', '订单核销', '寄出采样盒']
       return {
         status: resampleReentry(o),
         resample,
@@ -232,7 +234,8 @@ export function InstitutionApp({
 
   const metrics: Metric[] = isLab
     ? [
-        { label: '待收样', value: byStatus('toReceive').length, unit: '份', status: 'toReceive' },
+        { label: '待核销', value: ownByStatus('toVerify').length, unit: '单', status: 'toVerify' },
+        { label: '待采样', value: ownByStatus('toSample').length, unit: '例', status: 'toSample' },
         { label: '待检测', value: byStatus('toTest').length, unit: '份', status: 'toTest' },
         { label: '检测中', value: byStatus('testing').length, unit: '份', status: 'testing' },
       ]
@@ -334,16 +337,16 @@ export function InstitutionApp({
           context={target ? `核销订单：${target.patient} · ${target.no}` : undefined}
           manualLabel="核销码"
           manualPlaceholder="请输入 8 位核销码"
-          demoCode={target?.verifyCode ?? byStatus('toVerify')[0]?.verifyCode ?? '88264310'}
+          demoCode={target?.verifyCode ?? ownByStatus('toVerify')[0]?.verifyCode ?? '88264310'}
           validate={(code) => {
-            const match = target ?? byStatus('toVerify').find((o) => o.verifyCode === code)
+            const match = target ?? ownByStatus('toVerify').find((o) => o.verifyCode === code)
             if (!match) return '未找到该核销码对应的待核销订单'
             if (match.status !== 'toVerify') return '该订单已核销，请勿重复操作'
             if (match.verifyCode && match.verifyCode !== code) return '核销码与当前订单不匹配'
           }}
           onBack={() => setFlow(undefined)}
           onResult={(code) => {
-            const match = target ?? byStatus('toVerify').find((o) => o.verifyCode === code)
+            const match = target ?? ownByStatus('toVerify').find((o) => o.verifyCode === code)
             if (match) setPending({ type: 'verify', code, orderId: match.id })
           }}
         />
@@ -371,7 +374,7 @@ export function InstitutionApp({
 
   if (flow?.type === 'sample') {
     const target = findOrder(flow.orderId)
-    const candidates = byStatus('toSample')
+    const candidates = ownByStatus('toSample')
     const chosenId = pending?.type === 'sample' ? (pending.orderId ?? pickedOrderId) : undefined
     return shell(
       <>
@@ -519,7 +522,7 @@ export function InstitutionApp({
   if (flow?.type === 'ship') {
     return shell(
       <ShipBookingScreen
-        orders={byStatus('toShip')}
+        orders={ownByStatus('toShip')}
         profile={profile}
         initialSelected={flow.orderIds}
         onBack={() => setFlow(undefined)}

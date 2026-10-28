@@ -44,6 +44,7 @@ export type InstitutionRole = 'lab' | 'partner'
 export const sampleModeLabel: Record<SampleMode, string> = { self: '自采样', onsite: '定点采样' }
 
 export const LAB_NAME = '都正生物医学检验实验室'
+export const LAB_CODE = 'SYS-430100-0001'
 
 export const partnerInstitutions = {
   'JG-430102-0018': '仁和堂中西医结合诊所',
@@ -120,9 +121,19 @@ export const labStatusActions: Record<OrderStatus, OrderAction[]> = {
   closed: [],
 }
 
+/** 实验室本身也是定点采样网点，可承接用户到实验室采样的订单。 */
+export function isLabOwnOrder(order: Order) {
+  return order.mode === 'onsite' && order.institutionCode === LAB_CODE
+}
+
+const institutionStages: OrderStatus[] = ['toVerify', 'toSample', 'toShip']
+
 export function getOrderActions(order: Order, role: InstitutionRole): OrderAction[] {
   if (order.resample?.state === 'pending') {
     return role === 'lab' ? [{ label: '待客户确认', disabled: true }] : []
+  }
+  if (role === 'lab' && isLabOwnOrder(order) && institutionStages.includes(order.status)) {
+    return statusActions[order.status]
   }
   return (role === 'lab' ? labStatusActions : statusActions)[order.status]
 }
@@ -134,6 +145,7 @@ export function canSeeOrder(order: Order, role: InstitutionRole, institutionCode
 
 export function getSourceLabel(order: Order) {
   if (order.mode === 'self') return '自采样'
+  if (order.institutionCode === LAB_CODE) return '本实验室'
   return partnerInstitutions[order.institutionCode as keyof typeof partnerInstitutions] ?? '合作机构'
 }
 
@@ -504,6 +516,55 @@ export const orders: Order[] = [
       operator: '检验员 陈静',
       snapshot: { status: 'toTest', sampleCode: 'YW2610130015' },
     },
+  },
+  {
+    id: '24',
+    mode: 'onsite',
+    institutionCode: LAB_CODE,
+    no: 'DZ202610200011',
+    status: 'toVerify',
+    product: '药物基因检测 · 全面版',
+    spec: '覆盖 128 种常用药物',
+    patient: '邓*平',
+    phone: '135****6610',
+    mobile: '13574106610',
+    time: '10-20 09:12',
+    amount: 1299,
+    verifyCode: '73150286',
+  },
+  {
+    id: '25',
+    mode: 'onsite',
+    institutionCode: LAB_CODE,
+    no: 'DZ202610200024',
+    status: 'toSample',
+    product: '药物基因检测 · 精神类用药',
+    spec: '覆盖 46 种常用药物',
+    patient: '易*婷',
+    phone: '187****0932',
+    mobile: '18774310932',
+    time: '10-20 10:40',
+    amount: 899,
+    verifyCode: '61027734',
+    verifier: '检验员 陈静',
+  },
+  {
+    id: '26',
+    mode: 'onsite',
+    institutionCode: LAB_CODE,
+    no: 'DZ202610190057',
+    status: 'toShip',
+    product: '药物基因检测 · 高血压用药',
+    spec: '覆盖 24 种常用药物',
+    patient: '曾*强',
+    phone: '139****4475',
+    mobile: '13907314475',
+    time: '10-19 15:26',
+    amount: 499,
+    verifyCode: '50391846',
+    verifier: '检验员 陈静',
+    sampler: '检验员 陈静',
+    sampleCode: 'YW2610190057',
   },
 ]
 
